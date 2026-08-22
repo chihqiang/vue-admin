@@ -1,6 +1,6 @@
 import type { AppContext } from 'vue'
-import AlertContainer from './AlertContainer.vue'
-import { createFeedbackManager } from '@/components/ui/feedback/createFeedbackManager'
+import AlertContainer from './Container.vue'
+import { createFeedbackManager } from '@/components/ui/feedback/createManager'
 
 /** 重导出内联 Alert 组件，保持 `import { Alert } from '@/components/ui'` 可用 */
 export { default as Alert } from './Alert.vue'

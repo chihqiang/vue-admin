@@ -1,6 +1,6 @@
 import type { AppContext, Component } from 'vue'
-import NotificationContainer from './NotificationContainer.vue'
-import { createFeedbackManager } from '@/components/ui/feedback/createFeedbackManager'
+import NotificationContainer from './Container.vue'
+import { createFeedbackManager } from '@/components/ui/feedback/createManager'
 
 /** 通知类型 */
 export type NotificationType = 'success' | 'info' | 'warning' | 'error'
