@@ -1,6 +1,6 @@
 /**
  * 登录/登出/验证码/用户信息 相关接口
- * 每个方法直接返回解包后的 result（在 request 拦截器里统一处理 code !== 0 的情况）
+ * 每个方法直接返回解包后的 result（在 request 拦截器里统一处理 code !== 200 的情况）
  */
 import request from '@/utils/request'
 
@@ -61,7 +61,6 @@ export interface Permission {
   permissionName: string
   /** 每个权限点拥有的动作集合，例如 ['add','query','get','update','delete'] */
   actionList: string[]
-  [key: string]: unknown
 }
 
 /** 用户角色 */
@@ -89,7 +88,7 @@ export interface UserInfo extends Omit<LoginResult, 'token'> {
  * @param params LoginParams
  */
 export function login(params: LoginParams | LoginByMobileParams) {
-  return request.post<unknown, LoginResult>('/auth/login', params)
+  return request.post<LoginResult>('/auth/login', params)
 }
 
 /**
@@ -97,14 +96,14 @@ export function login(params: LoginParams | LoginByMobileParams) {
  * @param params { mobile: string }
  */
 export function getSmsCaptcha(params: { mobile: string }) {
-  return request.post<unknown, SmsCaptchaResult>('/account/sms', params)
+  return request.post<SmsCaptchaResult>('/account/sms', params)
 }
 
 /**
  * 查询两步验证是否开启
  */
 export function get2step() {
-  return request.post<unknown, TwoStepResult>('/auth/2step-code', {})
+  return request.post<TwoStepResult>('/auth/2step-code', {})
 }
 
 /**
@@ -112,12 +111,12 @@ export function get2step() {
  * 需要带上 token（request 拦截器会自动注入）
  */
 export function getInfo() {
-  return request.get<unknown, UserInfo>('/user/info')
+  return request.get<UserInfo>('/user/info')
 }
 
 /**
  * 登出（通知后端清理该 token，然后前端再清本地）
  */
 export function logout() {
-  return request.post<unknown, unknown>('/auth/logout', {})
+  return request.post<void>('/auth/logout', {})
 }

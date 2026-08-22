@@ -1,4 +1,4 @@
-/** 反馈类组件 */
+/** 反馈类组件（全部命名导出，避免 default 歧义） */
 export { default as Modal } from './Modal.vue'
 export { default as Drawer } from './Drawer.vue'
 export { default as Popover } from './Popover.vue'

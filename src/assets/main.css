@@ -5,8 +5,10 @@
  * - 统一字体（中文优先使用系统无衬线字体）
  * - 默认去掉 body 与 html 的 margin，让页面占满视口
  * - 登录/注册等用户相关页面统一使用 #f0f2f5 的浅灰背景基调
+ * - nprogress（路由进度条）样式统一在这里引入
  */
 @import 'tailwindcss';
+@import 'nprogress/nprogress.css';
 
 /* 基础重置与全局约定放在 @layer base，确保 Tailwind utility 可正确覆盖 */
 @layer base {

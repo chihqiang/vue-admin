@@ -2,14 +2,16 @@
  * NProgress 进度条 Hook
  *
  * 封装 nprogress，提供响应式的进度条控制：
- * - start(): 开始进度条
- * - done(): 完成进度条
- * - configure(options): 配置进度条参数
+ *   - start(): 开始进度条
+ *   - done(): 完成进度条
+ *   - configure(options): 配置进度条参数
+ *
+ * CSS 已统一在 @/assets/main.css 通过 @import 'nprogress/nprogress.css' 引入，
+ * 这里不再做副作用 import，避免多处调用时重复注入样式。
  *
  * 典型用途：路由切换、接口请求时显示顶部进度条
  */
 import NProgress from 'nprogress'
-import 'nprogress/nprogress.css'
 
 /** 默认配置：关闭旋转图标，使用平滑过渡 */
 NProgress.configure({ showSpinner: false, trickleSpeed: 200 })

@@ -222,5 +222,3 @@ export function error(config: ConfirmConfig) {
 export function setAppContext(ctx: AppContext) {
   appContext = ctx
 }
-
-export default confirm

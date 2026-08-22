@@ -36,20 +36,20 @@ export interface RadarItem {
 
 /** 获取进行中的项目列表 */
 export function getProjects() {
-  return request.get<unknown, WorkplaceProject[]>('/workplace/projects')
+  return request.get<WorkplaceProject[]>('/workplace/projects')
 }
 
 /** 获取用户动态列表 */
 export function getActivity() {
-  return request.get<unknown, WorkplaceActivity[]>('/workplace/activity')
+  return request.get<WorkplaceActivity[]>('/workplace/activity')
 }
 
-/** 获取团队成员列表（个人中心页亦复用） */
+/** 获取团队成员列表（工作台/个人中心页亦复用） */
 export function getTeams() {
-  return request.get<unknown, TeamMember[]>('/workplace/teams')
+  return request.get<TeamMember[]>('/workplace/teams')
 }
 
 /** 获取雷达图数据 */
 export function getRadar() {
-  return request.get<unknown, RadarItem[]>('/workplace/radar')
+  return request.get<RadarItem[]>('/workplace/radar')
 }

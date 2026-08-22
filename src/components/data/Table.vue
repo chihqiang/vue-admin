@@ -1,4 +1,4 @@
-<script setup lang="ts" generic="T extends Record<string, any>">
+<script setup lang="ts" generic="T extends Record<string, unknown>">
 /**
  * 高级表格 Table
  *
@@ -63,9 +63,12 @@ const sortOrder = ref<'asc' | 'desc' | null>(null)
 const sortedData = computed(() => {
   if (!sortField.value || !sortOrder.value) return props.data
   return [...props.data].sort((a, b) => {
-    const av = a[sortField.value]
-    const bv = b[sortField.value]
+    // 显式断言为可比较类型：排序值通常是 string | number | Date，比较前统一转 string 以兼容 unknown
+    const av = a[sortField.value] as unknown as string | number | null | undefined
+    const bv = b[sortField.value] as unknown as string | number | null | undefined
     if (av === bv) return 0
+    if (av == null) return 1
+    if (bv == null) return -1
     const result = av > bv ? 1 : -1
     return sortOrder.value === 'asc' ? result : -result
   })
@@ -136,7 +139,7 @@ const hasSlot = (name: string) => !!slots[name]
         <tbody>
           <tr
             v-for="(row, index) in sortedData"
-            :key="row[rowKey] ?? index"
+            :key="(row[rowKey] as unknown as PropertyKey | undefined) ?? index"
             class="border-b border-gray-50 transition-colors hover:bg-gray-50/50"
             @click="emit('row-click', row, index)"
             @dblclick="emit('row-dblclick', row, index)"

@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useNprogress } from '@/hooks/useNprogress'
+import { checkRoutePermission } from '@/utils/permission'
+import { alert } from '@/components'
 
 const { start: startProgress, done: doneProgress } = useNprogress()
 
@@ -21,7 +23,10 @@ declare module 'vue-router' {
     hideInBreadcrumb?: boolean
     /** 是否需要登录才能访问 */
     requiresAuth?: boolean
-    /** 权限标识（后续接权限时用） */
+    /**
+     * 权限标识（对应 userStore.permissions 中的 permissionId）
+     * 多个用英文逗号分隔表示"任一即可"（逻辑或）
+     */
     permission?: string
   }
 }
@@ -98,13 +103,13 @@ const routes: RouteRecordRaw[] = [
           {
             path: '/form/step-form',
             name: 'StepForm',
-            component: () => import('@/views/form/stepForm/StepForm.vue'),
+            component: () => import('@/views/form/step-form/StepForm.vue'),
             meta: { title: '分步表单' },
           },
           {
             path: '/form/advanced-form',
             name: 'AdvancedForm',
-            component: () => import('@/views/form/advancedForm/AdvancedForm.vue'),
+            component: () => import('@/views/form/advanced-form/AdvancedForm.vue'),
             meta: { title: '高级表单' },
           },
         ],
@@ -161,30 +166,60 @@ const router = createRouter({
 })
 
 /**
- * 全局前置守卫：登录鉴权
- * - meta.requiresAuth 为 true 的路由必须登录
- * - 未登录访问受保护页面 → 跳转 /login，并把原目标带在 redirect 上
- * - 已登录访问 /login → 直接进首页，避免重复登录
- *
- * 登录态判断统一走 useUserStore().isLogin（含过期校验），
- * 不在路由层直接读写 localStorage，token 由 store 统一管理
+ * 全局前置守卫（按优先级依次检查）：
+ *   1. 启动 NProgress
+ *   2. requiresAuth → 未登录跳 /login（带 redirect）
+ *   3. 已登录 & info 未拉取 → refreshUserInfo() 懒加载 /user/info
+ *   4. meta.permission → 无权限弹 alert 并回首页
+ *   5. 已登录却访问 /login → 直接跳首页
  */
-router.beforeEach((to) => {
-  // 路由切换时启动顶部进度条
+router.beforeEach(async (to) => {
   startProgress()
+
+  const userStore = useUserStore()
   // 父级 meta 会被 vue-router 合并到 matched 链上
   const requiresAuth = to.matched.some((r) => r.meta.requiresAuth)
-  const isLogin = useUserStore().isLogin
+  const isLogin = userStore.isLogin
 
+  // ---------- 2. 登录鉴权 ----------
   if (requiresAuth && !isLogin) {
+    doneProgress() // 被重定向，提前结束进度条
     return {
       path: '/login',
       query: to.fullPath !== '/' ? { redirect: to.fullPath } : undefined,
     }
   }
 
+  // ---------- 5. 已登录还访问登录页 → 跳首页 ----------
   if (to.path === '/login' && isLogin) {
-    // 已登录还访问登录页，直接跳首页
+    doneProgress()
+    return { path: '/' }
+  }
+
+  // ---------- 3. 已登录但用户信息为空 → 懒拉取 ----------
+  if (isLogin && requiresAuth && !userStore.info) {
+    try {
+      await userStore.refreshUserInfo()
+    } catch (err) {
+      // 拉取失败（比如 token 过期但本地还以为有效）→ 交给 request.ts 的 401 处理
+      console.warn('[router] refreshUserInfo failed，交给 401 流程处理：', err)
+    }
+  }
+
+  // ---------- 4. 路由级权限校验 ----------
+  // 从 matched 链中按"最深层且声明了 permission"的那个为准。
+  const requiredPermission = [...to.matched].reverse().find((r) => r.meta?.permission)?.meta
+    ?.permission
+  if (
+    isLogin &&
+    requiredPermission &&
+    !checkRoutePermission(userStore.permissions, requiredPermission)
+  ) {
+    doneProgress()
+    alert.error({
+      title: '无访问权限',
+      description: `您没有访问 "${to.meta?.title || to.path}" 所需的权限（${requiredPermission}）`,
+    })
     return { path: '/' }
   }
 

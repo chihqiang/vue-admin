@@ -1,16 +1,49 @@
 /**
  * HTTP 请求封装（基于 axios）
- * - 统一注入 Token 请求头
+ *
+ * - 统一注入 Token 请求头（从 userStore 取，不直接读 localStorage）
  * - 统一解包后端 { code, msg, data, request_id? } 结构
  * - code !== 200 按业务异常抛出
  * - 401 自动清理登录态并跳转登录页（携带 redirect 回跳）
+ * - 类型扩展：`request.get<T>(url)` 直接返回 `Promise<T>`（已解包 data），
+ *   不再需要写 `<unknown, T>` 双泛型
+ * - 解耦：全局 UI 提示（alert / message）不直接 import '@/components'，避免
+ *   未来 feedback 组件用到 request 时形成循环依赖。通过 `setToastHandler()`
+ *   在 main.ts 里注入。
  */
-import axios, { type AxiosError, type AxiosResponse } from 'axios'
-import type { InternalAxiosRequestConfig } from 'axios'
+import axios, { type AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
 import { ACCESS_TOKEN } from '@/stores/user'
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
-import { alert, message } from '@/components'
+
+// ========================================================================
+// 1. 类型扩展：让 request.get/post/put/delete<T> 直接 Promise<T>
+// ========================================================================
+
+declare module 'axios' {
+  interface AxiosInstance {
+    get<T = unknown, D = unknown>(url: string, config?: AxiosRequestConfig<D>): Promise<T>
+    post<T = unknown, D = unknown>(
+      url: string,
+      data?: D,
+      config?: AxiosRequestConfig<D>,
+    ): Promise<T>
+    put<T = unknown, D = unknown>(
+      url: string,
+      data?: D,
+      config?: AxiosRequestConfig<D>,
+    ): Promise<T>
+    delete<T = unknown, D = unknown>(
+      url: string,
+      config?: AxiosRequestConfig<D>,
+    ): Promise<T>
+    patch<T = unknown, D = unknown>(
+      url: string,
+      data?: D,
+      config?: AxiosRequestConfig<D>,
+    ): Promise<T>
+  }
+}
 
 /**
  * 通用的 HTTP 响应体结构（后端统一返回格式）
@@ -40,10 +73,62 @@ export interface PageResult<T> {
   pageSize: number
 }
 
-// 创建 axios 实例
+// ========================================================================
+// 2. Toast 注入：避免循环依赖 @/components
+// ========================================================================
+
+export interface ToastAlertConfig {
+  title?: string
+  description?: string
+}
+export interface ToastHandler {
+  /** 非阻塞的轻提示（message.warning / error 等） */
+  message: {
+    warning: (content: string) => void
+    error: (content: string) => void
+  }
+  /** 阻塞式/需要用户看的强提示（alert.error 等） */
+  alert: {
+    error: (config: ToastAlertConfig) => void
+  }
+}
+
+let toastHandler: ToastHandler | null = null
+
+/** 由 main.ts 在应用初始化时注入 feedback 组件实例 */
+export function setToastHandler(handler: ToastHandler): void {
+  toastHandler = handler
+}
+
+/** 兜底：main.ts 注入之前若报错，至少有 console 级别的输出 */
+function fallbackAlertError(config: ToastAlertConfig): void {
+   
+  console.error('[alert.error]', config.title, config.description)
+}
+function fallbackMessage(content: string, level: 'error' | 'warning'): void {
+  if (level === 'error') console.error('[message.error]', content)
+  else console.warn('[message.warning]', content)
+}
+function doAlertError(config: ToastAlertConfig): void {
+  if (toastHandler?.alert?.error) toastHandler.alert.error(config)
+  else fallbackAlertError(config)
+}
+function doMessageWarning(content: string): void {
+  if (toastHandler?.message?.warning) toastHandler.message.warning(content)
+  else fallbackMessage(content, 'warning')
+}
+function doMessageError(content: string): void {
+  if (toastHandler?.message?.error) toastHandler.message.error(content)
+  else fallbackMessage(content, 'error')
+}
+
+// ========================================================================
+// 3. axios 实例创建 + 拦截器
+// ========================================================================
+
 const request = axios.create({
-  // API 请求的默认前缀；开发时走相对路径，由 mock 直接拦截（或后续走 Vite proxy）
-  baseURL: '/api',
+  // API 请求前缀；开发时默认 /api，走 mock 或 vite proxy
+  baseURL: (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '/api',
   timeout: 10000,
 })
 
@@ -60,7 +145,7 @@ function handleUnauthorized(msg: string) {
     userStore.clearState()
     // 用 message（短暂自动消失）而非 alert：alert 默认不自动关，
     // 且通过 Teleport 渲染到 body，SPA 跳转后不会随之卸载，会残留在新页面
-    message.warning(msg)
+    doMessageWarning(msg)
   }
   // 已在跳转流程中则不再重复处理
   if (isRedirecting) return
@@ -88,7 +173,7 @@ function errorHandler(error: AxiosError<ApiResponse>): Promise<never> {
     if (status === 403) {
       const msg = data?.msg || '无权访问该资源'
       console.error('[403 Forbidden]', msg)
-      alert.error({ title: '无访问权限', description: msg })
+      doAlertError({ title: '无访问权限', description: msg })
     } else if (status === 401) {
       const msg = data?.msg || '登录状态已过期，请重新登录'
       handleUnauthorized(msg)
@@ -96,15 +181,16 @@ function errorHandler(error: AxiosError<ApiResponse>): Promise<never> {
       // 其他 HTTP 错误统一提示
       const msg = data?.msg || `请求失败（${status}）`
       console.error(`[${status}]`, msg)
-      alert.error({ title: '请求失败', description: msg })
+      doAlertError({ title: '请求失败', description: msg })
     }
   } else if (error.request) {
     // 网络层错误：未收到响应（断网 / 超时 / 跨域）
     const msg = error.code === 'ECONNABORTED' ? '请求超时，请检查网络' : '网络异常，请稍后重试'
     console.error('[Network Error]', msg)
-    alert.error({ title: '网络异常', description: msg })
+    doAlertError({ title: '网络异常', description: msg })
   } else {
     console.error('[Request Error]', error.message)
+    doMessageError(error.message || '请求出错')
   }
   return Promise.reject(error)
 }

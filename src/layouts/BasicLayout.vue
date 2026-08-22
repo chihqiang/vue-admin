@@ -1,20 +1,20 @@
 /**
  * 基础布局组件
  * 结构：左侧边栏（Logo + 菜单）+ 右侧（顶栏 + 内容区 router-view）
- * 支持侧边栏折叠/展开
+ *
+ * 侧边栏折叠状态由 stores/app 统一管理（带持久化，刷新保留用户偏好）。
  */
 <script setup lang="ts">
-import { ref } from 'vue'
 import { ShieldCheck } from '@lucide/vue'
 import SideMenu from '@/layouts/SideMenu.vue'
 import HeaderBar from '@/layouts/HeaderBar.vue'
+import { useAppStore } from '@/stores/app'
 
-/** 侧边栏是否折叠 */
-const collapsed = ref(false)
+const appStore = useAppStore()
 
-/** 切换折叠状态 */
+/** 切换折叠状态（由顶栏 emit 触发） */
 function handleToggle() {
-  collapsed.value = !collapsed.value
+  appStore.toggleCollapse()
 }
 </script>
 
@@ -23,7 +23,7 @@ function handleToggle() {
     <!-- ========== 侧边栏 ========== -->
     <aside
       class="flex-shrink-0 bg-white border-r border-gray-100 transition-all duration-300 flex flex-col"
-      :class="collapsed ? 'w-16' : 'w-56'"
+      :class="appStore.collapsed ? 'w-16' : 'w-56'"
     >
       <!-- Logo 区 -->
       <div
@@ -31,7 +31,7 @@ function handleToggle() {
       >
         <ShieldCheck :size="24" class="text-blue-500 flex-shrink-0" />
         <span
-          v-show="!collapsed"
+          v-show="!appStore.collapsed"
           class="text-base font-semibold text-gray-800 whitespace-nowrap"
         >
           vue-admin
@@ -47,7 +47,7 @@ function handleToggle() {
     <!-- ========== 右侧主区域 ========== -->
     <div class="flex-1 flex flex-col overflow-hidden">
       <!-- 顶栏 -->
-      <HeaderBar :collapsed="collapsed" @toggle-collapse="handleToggle" />
+      <HeaderBar :collapsed="appStore.collapsed" @toggle-collapse="handleToggle" />
 
       <!-- 内容区 -->
       <main class="flex-1 overflow-y-auto">

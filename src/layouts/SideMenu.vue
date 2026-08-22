@@ -2,12 +2,13 @@
  * 侧边栏菜单组件
  * 直接从路由表(router.options.routes)读取菜单树，路由即菜单
  * 支持：一级菜单展开/折叠、子菜单高亮、当前路由匹配
- * 图标使用 @lucide/vue，通过动态组件渲染
+ *
+ * 图标：从 @/utils/lucide 白名单导出集中读取（避免全量打包 @lucide/vue）。
  */
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import * as LucideIcons from '@lucide/vue'
+import * as Icons from '@/utils/lucide'
 import type { RouteRecordRaw } from 'vue-router'
 
 const route = useRoute()
@@ -67,10 +68,14 @@ function handleMenuClick(item: RouteRecordRaw) {
   router.push(item.path)
 }
 
-/** 根据图标名动态获取 lucide 图标组件 */
+/**
+ * 根据图标名动态获取 lucide 图标组件
+ * 图标来自 @/utils/lucide 的白名单显式导出，避免全量引入。
+ * 不在白名单中的图标名返回 null（模板里渲染时按缺失处理）。
+ */
 function getIcon(iconName?: string) {
   if (!iconName) return null
-  return (LucideIcons as Record<string, unknown>)[iconName] || null
+  return (Icons as Record<string, unknown>)[iconName] || null
 }
 
 /** 判断一级菜单是否激活（任一子菜单命中当前路径） */

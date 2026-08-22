@@ -1,32 +1,7 @@
 {
-  "extends": "@vue/tsconfig/tsconfig.dom.json",
-  "include": [
-    "env.d.ts",
-    "src/**/*",
-    "src/**/*.vue",
-
-    // 运行在 Node.js 环境的配置文件
-    "vite.config.*",
-    "vitest.config.*",
-    "cypress.config.*",
-    "playwright.config.*",
-    "eslint.config.*"
-  ],
-  "exclude": ["src/**/__tests__/*"],
-  "compilerOptions": {
-    // 上面的配置文件需要 Node.js 类型支持
-    // 注意：这也会让 `src/` 业务代码暴露出 Node 全局类型（如 process、Buffer）
-    "types": ["node"],
-
-    "noUncheckedIndexedAccess": true,
-
-    // 路径别名，简化导入写法
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-
-    // `vue-tsc --build` 会生成 .tsbuildinfo 文件用于增量类型检查
-    // 指定到这里是为了避免污染根目录
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo"
-  }
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
 }
