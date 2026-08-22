@@ -9,9 +9,14 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { getInfo, login as apiLogin, logout as apiLogout } from '@/api/login'
-import { ACCESS_TOKEN, TOKEN_EXPIRE_MS } from '@/constants'
 import type { LoginParams, LoginByMobileParams, UserInfo } from '@/types/user'
 import { timeFix } from '@/utils/util'
+
+/** 本地存储里 Token 的 key */
+export const ACCESS_TOKEN = 'Access-Token'
+
+/** Token 默认过期时间：7 天（毫秒） */
+export const TOKEN_EXPIRE_MS = 7 * 24 * 60 * 60 * 1000
 
 /** Token 在 localStorage 里的过期时间戳 key */
 const TOKEN_EXPIRE_KEY = 'Access-Token-Expire'

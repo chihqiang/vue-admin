@@ -7,7 +7,7 @@
  */
 import axios, { type AxiosError, type AxiosResponse } from 'axios'
 import type { InternalAxiosRequestConfig } from 'axios'
-import { ACCESS_TOKEN } from '@/constants'
+import { ACCESS_TOKEN } from '@/stores/user'
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
 import type { ApiResponse } from '@/types/api'
