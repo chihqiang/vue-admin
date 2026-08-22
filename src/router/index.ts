@@ -41,6 +41,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/form/BasicForm.vue'),
         meta: { title: '基础表单' },
       },
+      {
+        path: '/form/step-form',
+        name: 'StepForm',
+        component: () => import('@/views/form/stepForm/StepForm.vue'),
+        meta: { title: '分步表单' },
+      },
     ],
   },
 ]
