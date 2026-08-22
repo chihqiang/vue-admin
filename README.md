@@ -1,4 +1,4 @@
-# vue-tailwind-template
+# vue-admin
 
 > 基于 Vue 3 + TypeScript + TailwindCSS 的中后台前端模板，开箱即用。
 

@@ -34,7 +34,7 @@ function handleToggle() {
           v-show="!collapsed"
           class="text-base font-semibold text-gray-800 whitespace-nowrap"
         >
-          vue-tailwind-template
+          vue-admin
         </span>
       </div>
 

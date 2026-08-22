@@ -17,7 +17,7 @@ const links = ['帮助', '隐私', '条款']
     </div>
     <!-- 版权 -->
     <div class="text-sm text-gray-400">
-      Copyright © 2024 vue-tailwind-template
+      Copyright © 2024 vue-admin
     </div>
   </footer>
 </template>

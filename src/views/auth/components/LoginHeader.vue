@@ -18,7 +18,7 @@ import { ShieldCheck } from '@lucide/vue'
         class="text-[30px] font-semibold leading-[44px] tracking-tight text-[rgba(0,0,0,0.85)]"
         style="font-family: Avenir, 'Helvetica Neue', Arial, Helvetica, sans-serif"
       >
-        vue-tailwind-template
+        vue-admin
       </span>
     </a>
     <p class="mt-3 text-sm text-[rgba(0,0,0,0.45)]">

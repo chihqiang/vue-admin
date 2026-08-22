@@ -9,7 +9,7 @@ const projects = [
   {
     id: '1',
     cover: 'https://api.dicebear.com/7.x/shapes/svg?seed=p1&backgroundColor=1890ff',
-    title: 'vue-tailwind-template',
+    title: 'vue-admin',
     description: '基于 Vue 3 + TypeScript + TailwindCSS 的企业级中后台脚手架',
     group: '科学搬砖组',
     updatedAt: '9小时前',
@@ -63,7 +63,7 @@ const activities = [
       nickname: '张三',
       avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=zhangsan',
     },
-    project: { name: 'vue-tailwind-template', action: '更新了', event: '登录页面' },
+    project: { name: 'vue-admin', action: '更新了', event: '登录页面' },
     time: '3 分钟前',
   },
   {

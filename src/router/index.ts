@@ -188,7 +188,7 @@ router.beforeEach((to) => {
 
 // 全局后置守卫：统一设置页面标题（无需 i18n，全中文）
 router.afterEach((to) => {
-  const baseTitle = 'vue-tailwind-template'
+  const baseTitle = 'vue-admin'
   const pageTitle = to.meta?.title || ''
   document.title = pageTitle ? `${pageTitle} - ${baseTitle}` : baseTitle
 })
