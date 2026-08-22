@@ -15,7 +15,7 @@
  * 事件：
  * - @complete: 100% 时触发
  */
-import { computed, watch, useSlots } from 'vue'
+import { computed, watch } from 'vue'
 
 const props = withDefaults(
   defineProps<{
@@ -49,7 +49,7 @@ watch(
   { immediate: true },
 )
 
-const slots = useSlots()
+
 
 /** 颜色 */
 const barColor = computed(() => {

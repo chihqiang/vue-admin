@@ -20,7 +20,7 @@ const router = useRouter()
 const userStore = useUserStore()
 
 // ========== 折叠侧边栏 ==========
-const props = withDefaults(
+withDefaults(
   defineProps<{
     /** 侧边栏是否折叠 */
     collapsed?: boolean

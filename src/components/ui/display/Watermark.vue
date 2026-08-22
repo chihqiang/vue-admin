@@ -16,7 +16,7 @@
  *
  * 实现：content 用 Canvas 生成单元水印 → toDataURL → 背景图重复；image 直接用作背景
  */
-import { ref, computed, watch, onMounted, useSlots } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 
 interface FontConfig {
   color?: string
@@ -52,7 +52,6 @@ const props = withDefaults(
   },
 )
 
-const slots = useSlots()
 const base64Url = ref('')
 
 /** 计算实际偏移（默认 gap/2） */

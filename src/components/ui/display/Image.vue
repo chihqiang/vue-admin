@@ -15,7 +15,7 @@
  * 事件：
  * - @error: 加载错误 (event)
  */
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onBeforeUnmount } from 'vue'
 import { X, ZoomIn, RotateCw, RotateCcw } from '@lucide/vue'
 
 const props = withDefaults(

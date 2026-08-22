@@ -15,7 +15,6 @@
  * 事件：
  * - @change: 值变化
  */
-import { Check } from '@lucide/vue'
 
 const props = withDefaults(
   defineProps<{

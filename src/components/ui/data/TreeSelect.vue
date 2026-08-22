@@ -140,13 +140,17 @@ const selectedKeys = shallowRef<Set<T>>(new Set())
 const expandedKeys = shallowRef<Set<T>>(new Set())
 
 // ========== 字段映射辅助 ==========
+// fieldNames 支持自定义字段名，参数需接受任意结构对象，动态键访问本质需要 any
 /** 读取节点 value（按 fieldNames） */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getValue(node: any): T {
   return node[props.fieldNames.value] as T
 }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getTitle(node: any): string {
   return node[props.fieldNames.title] as string
 }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getChildren(node: any): TreeNodeRaw[] | undefined {
   return node[props.fieldNames.children] as TreeNodeRaw[] | undefined
 }

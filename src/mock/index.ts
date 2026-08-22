@@ -26,7 +26,7 @@ if (import.meta.env.DEV) {
   const FLAG = '__VUE_TAILWIND_MOCK_MOUNTED__' as const
   if (!(window as unknown as Record<string, boolean>)[FLAG]) {
     ;(window as unknown as Record<string, boolean>)[FLAG] = true
-    // eslint-disable-next-line no-console
+     
     console.log('%c[mock] mounted', 'color:#1677ff;font-weight:bold;')
   }
 }

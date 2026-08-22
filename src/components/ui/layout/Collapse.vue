@@ -15,7 +15,7 @@
  *     <template #panel-1>面板 1 内容</template>
  *   </Collapse>
  */
-import { ref, watch, useSlots } from 'vue'
+import { ref, watch } from 'vue'
 import { ChevronDown } from '@lucide/vue'
 
 interface CollapseItem {
@@ -41,8 +41,6 @@ const emit = defineEmits<{
   'update:activeKey': [keys: (string | number)[]]
   change: [keys: (string | number)[]]
 }>()
-
-const slots = useSlots()
 
 /** 内部展开状态 */
 const innerKeys = ref<Set<string | number>>(new Set(props.activeKey))

@@ -14,7 +14,7 @@ import type { AppContext, Component } from 'vue'
 
 /** 容器组件需暴露的 update 方法契约 */
 interface ContainerExposed {
-  update: (list: any[]) => void
+  update: (list: unknown[]) => void
 }
 
 /** 单条实例必须含有的字段（由工厂内部注入 key） */

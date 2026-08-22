@@ -2,6 +2,8 @@
  * 表格列配置
  * @template T 行数据类型
  */
+// 泛型约束用 any：TS 接口不自动满足 Record<string, unknown>，需 any 保证消费者任意接口可用
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface TableColumn<T extends Record<string, any> = Record<string, any>> {
   /** 列标题 */
   title: string

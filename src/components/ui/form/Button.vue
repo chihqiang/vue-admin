@@ -73,9 +73,6 @@ const hasIcon = computed(() => !!slots.icon || props.loading)
 /** 是否禁用（loading 时也禁用点击） */
 const isDisabled = computed(() => props.disabled || props.loading)
 
-/** 是否为无背景类型 */
-const isGhostType = computed(() => props.type === 'text' || props.type === 'link')
-
 // ========== 尺寸样式 ==========
 const sizeClass = computed(() => {
   const map: Record<ButtonSize, string> = {

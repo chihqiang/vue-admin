@@ -41,6 +41,7 @@ const option = computed<EChartsOption>(() => ({
   yAxis: { type: 'value', show: false },
   tooltip: {
     trigger: 'axis',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     formatter: (params: any) => params[0]?.value ?? '',
     axisPointer: { type: 'none' },
   },

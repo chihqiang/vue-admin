@@ -18,7 +18,6 @@
  */
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import type { Component } from 'vue'
-import { ChevronDown } from '@lucide/vue'
 
 interface DropdownItem {
   key: string | number

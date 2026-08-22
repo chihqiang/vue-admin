@@ -9,7 +9,7 @@
  * - #default: 自定义内容 ({ item, index })
  * - #dot: 自定义节点图标
  */
-import { computed, useSlots } from 'vue'
+import { computed } from 'vue'
 import type { Component } from 'vue'
 
 interface TimelineItem {
@@ -32,7 +32,7 @@ const props = withDefaults(
   },
 )
 
-const slots = useSlots()
+
 
 const displayItems = computed(() => (props.reverse ? [...props.items].reverse() : props.items))
 

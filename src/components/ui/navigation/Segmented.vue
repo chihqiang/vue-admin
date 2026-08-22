@@ -17,13 +17,12 @@
  * - #label: 自定义选项内容 ({ option })
  */
 import { computed } from 'vue'
-import { Check } from '@lucide/vue'
 
 interface SegmentedOption<T> {
   label: string
   value: T
   disabled?: boolean
-  payload?: any
+  payload?: unknown
 }
 
 const props = withDefaults(

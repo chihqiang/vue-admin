@@ -20,7 +20,7 @@
  * - @exceed: 超出限制 (files, fileList)
  * - @before-upload: 上传前钩子 (file) => boolean
  */
-import { ref, useSlots, onBeforeUnmount } from 'vue'
+import { ref, onBeforeUnmount } from 'vue'
 import { Upload as UploadIcon, X, File as FileIcon, Check, AlertCircle } from '@lucide/vue'
 
 interface UploadFile {
@@ -64,7 +64,6 @@ const emit = defineEmits<{
   'before-upload': [file: File]
 }>()
 
-const slots = useSlots()
 const inputRef = ref<HTMLInputElement>()
 const fileList = ref<UploadFile[]>([])
 

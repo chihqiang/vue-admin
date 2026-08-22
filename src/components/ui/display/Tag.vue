@@ -14,7 +14,7 @@
  * 事件：
  * - @close: 关闭时
  */
-import { computed, useSlots } from 'vue'
+import { computed } from 'vue'
 import { X } from '@lucide/vue'
 
 type PresetColor = 'blue' | 'green' | 'red' | 'orange' | 'purple' | 'cyan' | 'pink' | 'gray'
@@ -40,7 +40,7 @@ const emit = defineEmits<{
   close: [e: MouseEvent]
 }>()
 
-const slots = useSlots()
+
 
 /** 判断是否为预设颜色 */
 const isPreset = computed(() => ['blue', 'green', 'red', 'orange', 'purple', 'cyan', 'pink', 'gray'].includes(props.color))

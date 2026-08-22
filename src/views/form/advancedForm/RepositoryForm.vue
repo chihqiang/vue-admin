@@ -53,7 +53,7 @@ function validate(): boolean {
   if (!form.name.trim()) errors.name = '请输入仓库名称'
   if (!form.url.trim()) {
     errors.url = '请输入仓库域名'
-  } else if (!/^user-/.test(form.url)) {
+  } else if (!form.url.startsWith('user-')) {
     errors.url = '需要以 user- 开头'
   }
   if (!form.owner) errors.owner = '请选择管理员'
