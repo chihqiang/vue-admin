@@ -147,7 +147,7 @@ const isEmpty = computed(() => {
     <PageCard>
       <!-- 大搜索框 -->
       <div class="max-w-xl mx-auto">
-        <SearchInput v-model="searchText" placeholder="请输入搜索关键词" width="w-full" />
+        <SearchInput v-model="searchText" placeholder="请输入搜索关键词" custom-class="w-full" />
       </div>
       <!-- Tab -->
       <div class="flex items-center justify-center gap-6 mt-4 border-b border-gray-100">

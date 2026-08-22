@@ -9,7 +9,6 @@ import DataTable from '@/components/DataTable.vue'
 import PageCard from '@/components/PageCard.vue'
 import SearchInput from '@/components/SearchInput.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
-import EmptyState from '@/components/EmptyState.vue'
 import type { TableColumn } from '@/types/table'
 
 // ========== 统计信息 ==========
