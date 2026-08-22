@@ -4,8 +4,12 @@
  */
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Plus, Search, Edit, Trash2 } from '@lucide/vue'
+import { Plus, Edit, Trash2 } from '@lucide/vue'
 import DataTable from '@/components/DataTable.vue'
+import PageCard from '@/components/PageCard.vue'
+import SearchInput from '@/components/SearchInput.vue'
+import StatusBadge from '@/components/StatusBadge.vue'
+import EmptyState from '@/components/EmptyState.vue'
 import type { TableColumn } from '@/types/table'
 
 // ========== 统计信息 ==========
@@ -85,10 +89,10 @@ const statusTextMap: Record<string, string> = {
   waiting: '等待中',
   done: '已完成',
 }
-const statusColorMap: Record<string, string> = {
-  processing: 'text-blue-600 bg-blue-50',
-  waiting: 'text-orange-500 bg-orange-50',
-  done: 'text-green-600 bg-green-50',
+const statusTypeMap: Record<string, 'blue' | 'orange' | 'green'> = {
+  processing: 'blue',
+  waiting: 'orange',
+  done: 'green',
 }
 const progressBarColor: Record<string, string> = {
   processing: 'bg-blue-500',
@@ -100,7 +104,7 @@ const progressBarColor: Record<string, string> = {
 <template>
   <div class="min-h-full bg-gray-50 p-6 space-y-6">
     <!-- ========== 统计卡片 ========== -->
-    <div class="bg-white rounded-lg border border-gray-100 px-6 py-5">
+    <PageCard no-padding body-class="px-6 py-5">
       <div class="grid grid-cols-1 sm:grid-cols-3">
         <div
           v-for="(stat, i) in statsCards"
@@ -112,45 +116,32 @@ const progressBarColor: Record<string, string> = {
           <p class="text-xl font-semibold text-gray-800">{{ stat.value }}</p>
         </div>
       </div>
-    </div>
+    </PageCard>
 
     <!-- ========== 标准列表 ========== -->
-    <div class="bg-white rounded-lg border border-gray-100">
-      <!-- 标题 + 筛选操作 -->
-      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-        <h3 class="text-base font-medium text-gray-800">标准列表</h3>
-        <div class="flex items-center gap-3">
-          <!-- 状态筛选 -->
-          <div class="flex items-center border border-gray-200 rounded-md overflow-hidden">
-            <button
-              v-for="opt in [
-                { value: 'all', label: '全部' },
-                { value: 'processing', label: '进行中' },
-                { value: 'waiting', label: '等待中' },
-              ]"
-              :key="opt.value"
-              class="px-3 py-1.5 text-xs transition-colors"
-              :class="statusFilter === opt.value ? 'text-blue-600 bg-blue-50 font-medium' : 'text-gray-500 hover:bg-gray-50'"
-              @click="statusFilter = opt.value as 'all' | 'processing' | 'waiting'"
-            >
-              {{ opt.label }}
-            </button>
-          </div>
-          <!-- 搜索 -->
-          <div class="relative">
-            <input
-              v-model="searchText"
-              type="text"
-              placeholder="请输入"
-              class="w-56 pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-            />
-            <Search :size="14" class="absolute left-2.5 top-2 text-gray-400" />
-          </div>
+    <PageCard title="标准列表" no-padding body-class="p-0">
+      <!-- 标题栏右侧：筛选 + 搜索 -->
+      <template #extra>
+        <div class="flex items-center border border-gray-200 rounded-md overflow-hidden">
+          <button
+            v-for="opt in [
+              { value: 'all', label: '全部' },
+              { value: 'processing', label: '进行中' },
+              { value: 'waiting', label: '等待中' },
+            ]"
+            :key="opt.value"
+            class="px-3 py-1.5 text-xs transition-colors"
+            :class="statusFilter === opt.value ? 'text-blue-600 bg-blue-50 font-medium' : 'text-gray-500 hover:bg-gray-50'"
+            @click="statusFilter = opt.value as 'all' | 'processing' | 'waiting'"
+          >
+            {{ opt.label }}
+          </button>
         </div>
-      </div>
+        <SearchInput v-model="searchText" placeholder="请输入" />
+      </template>
 
       <!-- 新增按钮 -->
-      <div class="px-6 pt-4">
+      <div class="p-6 pb-0">
         <button
           class="w-full py-2 border border-dashed border-gray-300 rounded-md text-sm text-gray-500 hover:text-blue-500 hover:border-blue-400 transition-colors flex items-center justify-center gap-1"
           @click="handleAdd"
@@ -161,7 +152,7 @@ const progressBarColor: Record<string, string> = {
       </div>
 
       <!-- 通用表格 -->
-      <div class="px-6 py-4">
+      <div class="p-6">
         <DataTable
           :columns="columns"
           :data="filteredData"
@@ -174,12 +165,11 @@ const progressBarColor: Record<string, string> = {
               <img :src="row.avatar" class="w-10 h-10 rounded-lg flex-shrink-0" alt="图标" />
               <div>
                 <span class="text-sm font-medium text-gray-800 hover:text-blue-500 cursor-pointer">{{ row.title }}</span>
-                <span
-                  class="ml-2 px-2 py-0.5 text-xs rounded"
-                  :class="statusColorMap[row.status]"
-                >
-                  {{ statusTextMap[row.status] }}
-                </span>
+                <StatusBadge
+                  :text="statusTextMap[row.status] || ''"
+                  :type="statusTypeMap[row.status] || 'blue'"
+                  class="ml-2"
+                />
               </div>
             </div>
           </template>
@@ -228,6 +218,6 @@ const progressBarColor: Record<string, string> = {
           </template>
         </DataTable>
       </div>
-    </div>
+    </PageCard>
   </div>
 </template>

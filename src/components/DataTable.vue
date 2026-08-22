@@ -34,7 +34,7 @@ const props = withDefaults(
 
 // ========== 分页 ==========
 const currentPage = ref(1)
-const totalPages = computed(() => Math.ceil(props.data.length / props.pageSize.value) || 1)
+const totalPages = computed(() => Math.ceil(props.data.length / props.pageSize) || 1)
 const pagedData = computed(() => {
   if (!props.showPagination) return props.data
   const start = (currentPage.value - 1) * props.pageSize

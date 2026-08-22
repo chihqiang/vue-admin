@@ -3,8 +3,11 @@
  * 顶部搜索框 + Tab 切换（文章/项目/应用）+ 左侧筛选 + 右侧列表
  */
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { Search, Star, ThumbsUp, MessageCircle, Download, Pencil, Share2 } from '@lucide/vue'
+import PageCard from '@/components/PageCard.vue'
+import SearchInput from '@/components/SearchInput.vue'
+import EmptyState from '@/components/EmptyState.vue'
 
 // ========== 搜索 ==========
 const searchText = ref('')
@@ -19,7 +22,6 @@ const tabList = [
 ]
 
 // ========== 左侧筛选 ==========
-/** 文章分类 */
 const articleCategories = [
   { label: '全部', value: 'all' },
   { label: '前端开发', value: 'frontend' },
@@ -29,7 +31,6 @@ const articleCategories = [
 ]
 const activeCategory = ref('all')
 
-/** 项目分类 */
 const projectCategories = [
   { label: '全部', value: 'all' },
   { label: '企业级', value: 'enterprise' },
@@ -131,21 +132,22 @@ function selectCategory(value: string) {
   if (activeTab.value === 'article') activeCategory.value = value
   else if (activeTab.value === 'project') activeProjectCategory.value = value
 }
+
+/** 当前列表是否为空 */
+const isEmpty = computed(() => {
+  if (activeTab.value === 'article') return filteredArticles.value.length === 0
+  if (activeTab.value === 'project') return filteredProjects.value.length === 0
+  return filteredApps.value.length === 0
+})
 </script>
 
 <template>
-  <div class="min-h-full bg-gray-50 p-6">
+  <div class="min-h-full bg-gray-50 p-6 space-y-6">
     <!-- 搜索区域 -->
-    <div class="bg-white rounded-lg border border-gray-100 p-6 mb-6">
+    <PageCard>
       <!-- 大搜索框 -->
-      <div class="max-w-xl mx-auto relative">
-        <input
-          v-model="searchText"
-          type="text"
-          placeholder="请输入搜索关键词"
-          class="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-        />
-        <Search :size="16" class="absolute left-3 top-3 text-gray-400" />
+      <div class="max-w-xl mx-auto">
+        <SearchInput v-model="searchText" placeholder="请输入搜索关键词" width="w-full" />
       </div>
       <!-- Tab -->
       <div class="flex items-center justify-center gap-6 mt-4 border-b border-gray-100">
@@ -163,15 +165,14 @@ function selectCategory(value: string) {
           {{ tab.label }}
         </button>
       </div>
-    </div>
+    </PageCard>
 
     <!-- 内容区：左筛选 + 右列表 -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <!-- 左侧筛选 -->
       <div class="lg:col-span-1">
-        <div class="bg-white rounded-lg border border-gray-100 p-4">
-          <h4 class="text-sm font-medium text-gray-800 mb-3">分类筛选</h4>
-          <div class="space-y-1" v-if="currentCategories.length > 0">
+        <PageCard title="分类筛选">
+          <div v-if="currentCategories.length > 0" class="space-y-1">
             <button
               v-for="cat in currentCategories"
               :key="cat.value"
@@ -187,12 +188,12 @@ function selectCategory(value: string) {
             </button>
           </div>
           <p v-else class="text-sm text-gray-400">暂无分类筛选</p>
-        </div>
+        </PageCard>
       </div>
 
       <!-- 右侧列表 -->
       <div class="lg:col-span-3">
-        <div class="bg-white rounded-lg border border-gray-100 p-6">
+        <PageCard>
           <!-- 文章列表 -->
           <div v-if="activeTab === 'article'">
             <div class="space-y-6">
@@ -284,10 +285,8 @@ function selectCategory(value: string) {
           </div>
 
           <!-- 空状态 -->
-          <div v-if="(activeTab === 'article' && filteredArticles.length === 0) || (activeTab === 'project' && filteredProjects.length === 0) || (activeTab === 'application' && filteredApps.length === 0)" class="text-center py-16 text-gray-400 text-sm">
-            暂无数据
-          </div>
-        </div>
+          <EmptyState v-if="isEmpty" />
+        </PageCard>
       </div>
     </div>
   </div>
