@@ -1,18 +1,10 @@
+<script setup lang="ts" generic="T extends Record<string, any>">
 /**
  * 通用表格组件 DataTable
  * 通过 columns 配置列，data 提供数据，内置分页和空状态
  *
- * 用法示例：
- * <DataTable :columns="columns" :data="list" :page-size="5" row-key="id">
- *   <!-- 自定义某列内容 -->
- *   <template #cell-name="{ row }">{{ row.name }}</template>
- *   <!-- 操作列 -->
- *   <template #cell-action="{ row }">
- *     <button @click="edit(row)">编辑</button>
- *   </template>
- * </DataTable>
+ * 用法：传 columns 和 data，用 #cell-{dataIndex} 插槽自定义列内容
  */
-<script setup lang="ts" generic="T extends Record<string, any>">
 import { ref, computed } from 'vue'
 import { ChevronLeft, ChevronRight } from '@lucide/vue'
 import type { TableColumn } from '@/types/table'
