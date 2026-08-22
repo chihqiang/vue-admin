@@ -53,6 +53,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/form/advancedForm/AdvancedForm.vue'),
         meta: { title: '高级表单' },
       },
+      {
+        path: '/profile/basic',
+        name: 'ProfileBasic',
+        component: () => import('@/views/profile/ProfileBasic.vue'),
+        meta: { title: '基本设置' },
+      },
     ],
   },
 ]
