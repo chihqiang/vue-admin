@@ -1,5 +1,5 @@
 import type { AppContext } from 'vue'
-import AlertContainer from './Container.vue'
+import Container from './Container.vue'
 import { createFeedbackManager } from '@/components/ui/feedback/createManager'
 
 /** 重导出内联 Alert 组件，保持 `import { Alert } from '@/components/ui'` 可用 */
@@ -39,7 +39,7 @@ interface AlertItem extends AlertConfig {
 }
 
 const manager = createFeedbackManager<AlertItem>({
-  container: AlertContainer,
+  container: Container,
   containerClass: 'alert-container',
   idPrefix: 'alert',
   defaultDuration: 0,

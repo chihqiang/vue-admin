@@ -1,5 +1,5 @@
 import type { AppContext, Component } from 'vue'
-import NotificationContainer from './Container.vue'
+import Container from './Container.vue'
 import { createFeedbackManager } from '@/components/ui/feedback/createManager'
 
 /** 通知类型 */
@@ -43,7 +43,7 @@ interface NotificationItem extends NotificationConfig {
 }
 
 const manager = createFeedbackManager<NotificationItem>({
-  container: NotificationContainer,
+  container: Container,
   containerClass: 'notification-container',
   idPrefix: 'notification',
   defaultDuration: 4.5,

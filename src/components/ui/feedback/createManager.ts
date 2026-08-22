@@ -68,7 +68,7 @@ export interface FeedbackManager<Item extends BaseItem> {
  * 创建一个反馈容器管理器
  * @example
  * const manager = createFeedbackManager<MessageItem>({
- *   container: MessageContainer,
+ *   container: Container,
  *   containerClass: 'message-container',
  *   idPrefix: 'message',
  *   defaultDuration: 3,

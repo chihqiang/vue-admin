@@ -1,5 +1,5 @@
 import type { AppContext } from 'vue'
-import MessageContainer from './Container.vue'
+import Container from './Container.vue'
 import { createFeedbackManager } from '@/components/ui/feedback/createManager'
 
 /** 消息类型 */
@@ -30,7 +30,7 @@ interface MessageItem extends MessageConfig {
 }
 
 const manager = createFeedbackManager<MessageItem>({
-  container: MessageContainer,
+  container: Container,
   containerClass: 'message-container',
   idPrefix: 'message',
   defaultDuration: 3,
