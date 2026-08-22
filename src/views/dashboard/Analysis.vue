@@ -7,12 +7,12 @@
  */
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { Info, MoreHorizontal } from '@lucide/vue'
+import { Info, MoreHorizontal, ArrowUp, ArrowDown } from '@lucide/vue'
 
 // 基础组件
 import ChartCard from '@/components/charts/ChartCard.vue'
 import Trend from '@/components/trend/Trend.vue'
-import NumberInfo from '@/components/number-info/NumberInfo.vue'
+import { Statistic } from '@/components/ui'
 import RankList from '@/components/charts/RankList.vue'
 import MiniProgress from '@/components/charts/MiniProgress.vue'
 
@@ -314,15 +314,21 @@ const activeTime = ref('全部')
           <MoreHorizontal :size="16" class="text-gray-400 cursor-pointer" />
         </div>
         <div class="px-6 py-4">
-          <!-- 数字信息 -->
+          <!-- 数字信息：用 Statistic 替换 NumberInfo，title 显示副标题，suffix 显示涨跌幅 -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
             <div>
-              <NumberInfo :total="12321" :sub-total="17.1" status="up">
-                <template #subtitle>
+              <Statistic :value="12321" :value-style="{ fontWeight: 500 }">
+                <template #title>
                   <span class="mr-2">搜索用户数</span>
                   <Info :size="14" class="text-gray-400" />
                 </template>
-              </NumberInfo>
+                <template #suffix>
+                  <span class="inline-flex items-center text-sm font-medium text-red-500">
+                    <ArrowUp :size="12" />
+                    17.1%
+                  </span>
+                </template>
+              </Statistic>
               <div class="mt-2">
                 <MiniSmoothArea
                   :data-source="searchUserData"
@@ -332,12 +338,18 @@ const activeTime = ref('全部')
               </div>
             </div>
             <div>
-              <NumberInfo :total="2.7" :sub-total="26.2" status="down">
-                <template #subtitle>
+              <Statistic :value="2.7" :value-style="{ fontWeight: 500 }">
+                <template #title>
                   <span class="mr-2">人均搜索次数</span>
                   <Info :size="14" class="text-gray-400" />
                 </template>
-              </NumberInfo>
+                <template #suffix>
+                  <span class="inline-flex items-center text-sm font-medium text-green-500">
+                    <ArrowDown :size="12" />
+                    26.2%
+                  </span>
+                </template>
+              </Statistic>
               <div class="mt-2">
                 <MiniSmoothArea
                   :data-source="searchUserData"

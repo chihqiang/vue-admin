@@ -13,18 +13,20 @@ withDefaults(
     type?: 'horizontal' | 'vertical'
     dashed?: boolean
     orientation?: 'left' | 'center' | 'right'
+    customClass?: string
   }>(),
   {
     type: 'horizontal',
     dashed: false,
     orientation: 'center',
+    customClass: '',
   },
 )
 </script>
 
 <template>
   <!-- 水平分割线 -->
-  <div v-if="type === 'horizontal'" class="relative w-full my-4">
+  <div v-if="type === 'horizontal'" class="relative w-full my-4" :class="customClass">
     <div
       class="border-t"
       :class="dashed ? 'border-dashed border-gray-200' : 'border-gray-100'"
@@ -47,6 +49,6 @@ withDefaults(
   <div
     v-else
     class="inline-block h-4 mx-2 border-l"
-    :class="dashed ? 'border-dashed border-gray-200' : 'border-gray-200'"
+    :class="[dashed ? 'border-dashed border-gray-200' : 'border-gray-200', customClass]"
   ></div>
 </template>

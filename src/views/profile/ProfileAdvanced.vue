@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue'
 import { Plus, Star, ThumbsUp, MessageCircle, Download, Pencil, Share2, Ellipsis } from '@lucide/vue'
-import { Card, Tag, Button } from '@/components/ui'
+import { Card, Tag, Button, Divider, Input } from '@/components/ui'
 import { useUserStore } from '@/stores/user'
 import request from '@/utils/request'
 
@@ -21,7 +21,7 @@ const bio = ref('海纳百川，有容乃大')
 const tags = ref(['很有想法的', '专注设计', '辣~', '大长腿', '川妹子', '海纳百川'])
 const tagInputVisible = ref(false)
 const tagInputValue = ref('')
-const tagInputRef = ref<HTMLInputElement>()
+const tagInputRef = ref<{ focus: () => void; blur: () => void }>()
 
 /** 删除标签 */
 function handleTagClose(tag: string) {
@@ -236,7 +236,7 @@ function loadMoreArticles() {
             </div>
           </div>
 
-          <hr class="border-gray-100 my-4" />
+          <Divider />
 
           <!-- 标签 -->
           <div class="mb-4">
@@ -250,14 +250,14 @@ function loadMoreArticles() {
                 @close="handleTagClose(tag)"
               >{{ tag.length > 20 ? tag.slice(0, 20) + '...' : tag }}</Tag>
               <!-- 新增标签输入框 -->
-              <input
+              <Input
                 v-if="tagInputVisible"
                 ref="tagInputRef"
                 v-model="tagInputValue"
-                type="text"
-                class="px-2 py-1 text-xs border border-blue-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-200 w-24"
+                size="sm"
+                custom-class="w-24"
                 @blur="handleTagInputConfirm"
-                @keyup.enter="handleTagInputConfirm"
+                @enter="handleTagInputConfirm"
               />
               <!-- 新增标签按钮 -->
               <Button
@@ -272,7 +272,7 @@ function loadMoreArticles() {
             </div>
           </div>
 
-          <hr class="border-gray-100 border-dashed my-4" />
+          <Divider dashed />
 
           <!-- 团队 -->
           <div>

@@ -154,12 +154,12 @@ function errClass(err?: string) {
             <span class="text-red-500">*</span> 目标描述
           </label>
           <div class="flex-1">
-            <textarea
+            <Input
               v-model="form.description"
-              rows="4"
+              type="textarea"
+              :rows="4"
               placeholder="请输入你的阶段性工作目标"
-              class="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 resize-none"
-              :class="errors.description ? 'border-red-300' : 'border-gray-200'"
+              :custom-class="errClass(errors.description)"
             />
             <p v-if="errors.description" class="text-xs text-red-500 mt-1">{{ errors.description }}</p>
           </div>
@@ -171,12 +171,12 @@ function errClass(err?: string) {
             <span class="text-red-500">*</span> 衡量标准
           </label>
           <div class="flex-1">
-            <textarea
+            <Input
               v-model="form.standard"
-              rows="4"
+              type="textarea"
+              :rows="4"
               placeholder="请输入衡量标准"
-              class="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 resize-none"
-              :class="errors.standard ? 'border-red-300' : 'border-gray-200'"
+              :custom-class="errClass(errors.standard)"
             />
             <p v-if="errors.standard" class="text-xs text-red-500 mt-1">{{ errors.standard }}</p>
           </div>

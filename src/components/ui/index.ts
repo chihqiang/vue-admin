@@ -50,6 +50,7 @@ export { default as Tooltip } from './Tooltip.vue'
 export { Alert, alert } from './alert'
 export { default as message } from './message'
 export { default as notification } from './notification'
+export { confirm, info, success, warning, error } from './confirm'
 
 // 数据类
 export { default as Table } from './Table.vue'

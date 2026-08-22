@@ -7,7 +7,7 @@
 import { reactive, ref, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { CheckCircle } from '@lucide/vue'
-import { Card, Steps, Select, Input, Button, Alert } from '@/components/ui'
+import { Card, Steps, Select, Input, Button, Alert, Divider } from '@/components/ui'
 
 const router = useRouter()
 
@@ -199,7 +199,7 @@ function toOrderList() {
               </div>
 
               <!-- 分割线 -->
-              <hr class="border-gray-100 my-4" />
+              <Divider />
 
               <!-- 说明 -->
               <div class="px-8 text-gray-400">
@@ -245,7 +245,7 @@ function toOrderList() {
               </div>
 
               <!-- 分割线 -->
-              <hr class="border-gray-100 mb-6" />
+              <Divider custom-class="!my-0 mb-6" />
 
               <!-- 支付密码 -->
               <div class="flex items-start gap-4 mb-6">

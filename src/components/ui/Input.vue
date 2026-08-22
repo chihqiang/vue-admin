@@ -11,7 +11,8 @@
  * - allowClear: 可清除
  * - showCount: 显示字数统计
  * - maxlength: 最大长度
- * - type: text / password / number 等
+ * - type: text / password / number / textarea（textarea 模式渲染多行输入）
+ * - rows: textarea 行数（仅 type=textarea 生效，默认 2）
  * - variant: outlined / borderless / filled
  *
  * 事件：
@@ -33,6 +34,8 @@ const props = withDefaults(
     maxlength?: number
     variant?: 'outlined' | 'borderless' | 'filled'
     customClass?: string
+    /** textarea 行数，仅 type=textarea 时生效 */
+    rows?: number
   }>(),
   {
     modelValue: '',
@@ -45,6 +48,7 @@ const props = withDefaults(
     showCount: false,
     variant: 'outlined',
     customClass: '',
+    rows: 2,
   },
 )
 
@@ -60,18 +64,17 @@ const emit = defineEmits<{
 const slots = useSlots()
 const focused = ref(false)
 
+const isTextarea = computed(() => props.type === 'textarea')
 const hasPrefix = computed(() => !!slots.prefix)
 const hasSuffix = computed(() => !!slots.suffix || props.allowClear || props.showCount)
 const showClear = computed(() => props.allowClear && props.modelValue !== '' && !props.disabled)
 
-// 尺寸
+// 尺寸（textarea 模式仅用 px/padding，不用固定高度）
 const sizeClass = computed(() => {
-  const map = {
-    sm: 'h-7 text-xs px-2.5',
-    md: 'h-8 text-sm px-3',
-    lg: 'h-10 text-base px-3.5',
+  if (isTextarea.value) {
+    return { sm: 'text-xs px-2.5 py-1.5', md: 'text-sm px-3 py-1.5', lg: 'text-base px-3.5 py-2' }[props.size]
   }
-  return map[props.size]
+  return { sm: 'h-7 text-xs px-2.5', md: 'h-8 text-sm px-3', lg: 'h-10 text-base px-3.5' }[props.size]
 })
 
 // 变体样式
@@ -81,10 +84,10 @@ const variantClass = computed(() => {
   return 'border border-gray-200 bg-white hover:border-gray-300 focus:border-blue-400'
 })
 
-const inputRef = ref<HTMLInputElement>()
+const inputRef = ref<HTMLInputElement | HTMLTextAreaElement>()
 
 function handleInput(e: Event) {
-  const val = (e.target as HTMLInputElement).value
+  const val = (e.target as HTMLInputElement | HTMLTextAreaElement).value
   emit('update:modelValue', val)
   emit('change', e)
 }
@@ -105,6 +108,8 @@ function handleBlur(e: FocusEvent) {
 }
 
 function handleEnter(e: KeyboardEvent) {
+  // textarea 模式下不触发 enter（Enter 用于换行）
+  if (isTextarea.value) return
   if (e.key === 'Enter') emit('enter', e)
 }
 
@@ -116,7 +121,54 @@ defineExpose({
 </script>
 
 <template>
+  <!-- textarea 模式：relative 容器，字数统计/清除按钮绝对定位右下角 -->
   <div
+    v-if="isTextarea"
+    class="relative w-full rounded-md transition-colors"
+    :class="[
+      sizeClass,
+      variantClass,
+      disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : '',
+      focused && variant === 'outlined' ? 'ring-2 ring-blue-200' : '',
+      customClass,
+    ]"
+  >
+    <textarea
+      ref="inputRef"
+      :value="modelValue"
+      :rows="rows"
+      :placeholder="placeholder"
+      :disabled="disabled"
+      :readonly="readonly"
+      :maxlength="maxlength"
+      class="block w-full bg-transparent border-0 outline-none placeholder-gray-300 resize-y"
+      @input="handleInput"
+      @focus="handleFocus"
+      @blur="handleBlur"
+    />
+
+    <!-- 字数统计 + 清除（绝对定位右下角） -->
+    <div
+      v-if="showCount || showClear"
+      class="absolute bottom-1.5 right-2 flex items-center gap-1.5 text-xs text-gray-400"
+    >
+      <span v-if="showCount">
+        {{ String(modelValue ?? '').length }}{{ maxlength ? `/${maxlength}` : '' }}
+      </span>
+      <button
+        v-if="showClear"
+        type="button"
+        class="text-gray-300 hover:text-gray-500"
+        @click="handleClear"
+      >
+        <X :size="14" />
+      </button>
+    </div>
+  </div>
+
+  <!-- 普通输入模式 -->
+  <div
+    v-else
     class="inline-flex items-center w-full rounded-md transition-colors"
     :class="[
       sizeClass,

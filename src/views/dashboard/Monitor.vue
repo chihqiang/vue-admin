@@ -9,7 +9,7 @@ import { LineChart, BarChart, PieChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent, LegendComponent, TitleComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import { Activity, TrendingUp, DollarSign, Users, Server, AlertTriangle, CheckCircle, ArrowUp, ArrowDown } from '@lucide/vue'
-import { Card } from '@/components/ui'
+import { Card, Statistic, Progress } from '@/components/ui'
 import type { Component } from 'vue'
 
 echarts.use([LineChart, BarChart, PieChart, GridComponent, TooltipComponent, LegendComponent, TitleComponent, CanvasRenderer])
@@ -206,10 +206,14 @@ const activityColorMap: Record<string, string> = {
           <div class="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" :class="iconColorMap[card.color]">
             <component :is="card.icon" :size="22" />
           </div>
-          <!-- 文字内容 -->
+          <!-- 文字内容：用 Statistic 渲染标题+数值，formatter 跳过数字解析以保留原字符串（如 32/36、￥328,752） -->
           <div class="flex-1 min-w-0">
-            <p class="text-sm text-gray-400 mb-1">{{ card.label }}</p>
-            <p class="text-xl font-semibold text-gray-800">{{ card.value }}</p>
+            <Statistic
+              :title="card.label"
+              :value="card.value"
+              :formatter="(v: string | number) => String(v)"
+              :value-style="{ fontSize: '1.25rem', fontWeight: 600, color: '#1f2937' }"
+            />
           </div>
           <!-- 趋势 -->
           <span
@@ -303,13 +307,14 @@ const activityColorMap: Record<string, string> = {
               {{ item.rank }}
             </span>
             <span class="text-sm text-gray-600 w-24 flex-shrink-0">{{ item.name }}</span>
-            <!-- 进度条 -->
-            <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                class="h-full rounded-full transition-all"
-                :class="item.rank <= 3 ? 'bg-blue-500' : 'bg-blue-200'"
-                :style="{ width: item.percent + '%' }"
-              ></div>
+            <!-- 进度条：用 Progress 组件，前三名深蓝、其余浅蓝，不显示百分比文字 -->
+            <div class="flex-1">
+              <Progress
+                :percent="item.percent"
+                :show-info="false"
+                size="md"
+                :stroke-color="item.rank <= 3 ? '#3b82f6' : '#bfdbfe'"
+              />
             </div>
             <span class="text-sm text-gray-500 w-12 text-right flex-shrink-0">{{ item.value.toLocaleString() }}</span>
           </div>

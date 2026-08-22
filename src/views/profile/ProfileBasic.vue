@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { CloudUpload, Plus } from '@lucide/vue'
-import { Card, Input, Select, Button, message } from '@/components/ui'
+import { Card, Input, Select, Button, Upload, message } from '@/components/ui'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
@@ -62,20 +62,10 @@ async function handleUpdate() {
 }
 
 // ========== 头像上传 ==========
-const fileInput = ref<HTMLInputElement>()
 const uploading = ref(false)
 
-/** 点击头像区域触发文件选择 */
-function triggerUpload() {
-  fileInput.value?.click()
-}
-
-/** 处理文件选择 */
-function handleFileChange(e: Event) {
-  const target = e.target as HTMLInputElement
-  const file = target.files?.[0]
-  if (!file) return
-
+/** 上传前钩子：读取文件并预览头像，返回 false 取消自动上传（实际项目可在此调用真实上传接口） */
+function handleAvatarBeforeUpload(file: File): boolean {
   uploading.value = true
   const reader = new FileReader()
   reader.onload = (evt) => {
@@ -85,6 +75,7 @@ function handleFileChange(e: Event) {
     uploading.value = false
   }
   reader.readAsDataURL(file)
+  return false
 }
 </script>
 
@@ -137,11 +128,11 @@ function handleFileChange(e: Event) {
               <!-- 个人简介 -->
               <div>
                 <label class="block text-sm text-gray-700 mb-1.5">个人简介</label>
-                <textarea
+                <Input
                   v-model="form.profile"
-                  rows="4"
+                  type="textarea"
+                  :rows="4"
                   placeholder="请输入个人简介"
-                  class="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 resize-none"
                 />
               </div>
 
@@ -179,37 +170,33 @@ function handleFileChange(e: Event) {
 
             <!-- 右侧头像上传区 -->
             <div class="flex flex-col items-center lg:w-48 flex-shrink-0">
-              <div
-                class="relative w-32 h-32 rounded-full overflow-hidden cursor-pointer group"
-                @click="triggerUpload"
+              <!-- 头像上传：Upload 组件,默认插槽渲染头像预览,beforeUpload 返回 false 取消自动上传 -->
+              <Upload
+                accept="image/*"
+                list-type="picture"
+                :before-upload="handleAvatarBeforeUpload"
               >
-                <!-- 当前头像 -->
-                <img
-                  :src="avatarUrl"
-                  alt="头像"
-                  class="w-full h-full object-cover"
-                />
-                <!-- hover 遮罩 -->
-                <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div class="text-center text-white">
-                    <Plus :size="20" class="mx-auto mb-1" />
-                    <span class="text-xs">更换头像</span>
+                <div class="relative w-32 h-32 rounded-full overflow-hidden cursor-pointer group">
+                  <!-- 当前头像 -->
+                  <img
+                    :src="avatarUrl"
+                    alt="头像"
+                    class="w-full h-full object-cover"
+                  />
+                  <!-- hover 遮罩 -->
+                  <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div class="text-center text-white">
+                      <Plus :size="20" class="mx-auto mb-1" />
+                      <span class="text-xs">更换头像</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Upload>
               <!-- 上传图标 -->
               <div class="mt-3 flex items-center gap-1 text-gray-400">
                 <CloudUpload :size="14" />
                 <span class="text-xs">{{ uploading ? '上传中...' : '点击头像上传' }}</span>
               </div>
-              <!-- 隐藏的 file input -->
-              <input
-                ref="fileInput"
-                type="file"
-                accept="image/*"
-                class="hidden"
-                @change="handleFileChange"
-              />
             </div>
           </div>
         </div>

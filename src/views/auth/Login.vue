@@ -8,7 +8,7 @@ import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { LogIn } from '@lucide/vue'
 import { useUserStore } from '@/stores/user'
-import { md5, timeFix } from '@/utils/util'
+import { timeFix } from '@/utils/util'
 import { Alert, Button, message } from '@/components/ui'
 import LoginHeader from './components/LoginHeader.vue'
 import AccountLoginForm from './components/AccountLoginForm.vue'
@@ -71,7 +71,7 @@ async function handleSubmit() {
       await userStore.Login(
         {
           [isEmail ? 'email' : 'username']: data.username,
-          password: md5(data.password),
+          password: data.password,
           remember_me: data.rememberMe,
         },
         data.rememberMe,

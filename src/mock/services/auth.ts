@@ -1,10 +1,10 @@
 /**
  * 认证相关 Mock：登录 / 登出 / 短信验证码 / 两步验证开关
  *
- * 账号密码登录规则：
- * - 用户名：admin   密码（明文）：admin        → 密码 md5 为 21232f297a57a5a743894a0e4a801fc3
- * - 用户名：super   密码（明文）：ant.design   → 密码 md5 为 8914de686ab28dc22f30d3d8e107ff6c
- *   （与参考项目保持一致，方便测试）
+ * 账号密码登录规则（明文，方便测试）：
+ * - 用户名：admin   密码：admin
+ * - 用户名：super   密码：super
+ * - 也支持邮箱形式：admin@example.com / super@example.com，密码同上
  *
  * 手机号登录规则：
  * - 任意格式正确的 11 位手机号 + 验证码 123456 即可成功（实际发送的验证码会由 mock 随机返回）
@@ -13,14 +13,11 @@ import Mock from 'mockjs'
 import { builder, failBuilder, getBody } from '../util'
 import type { LoginParams, LoginByMobileParams } from '@/types/user'
 
-// 允许登录的用户名集合
-const VALID_USERNAMES = ['admin', 'super']
-
-// 与上方规则对应的密码 md5
-const VALID_PASSWORD_HASH = [
-  '21232f297a57a5a743894a0e4a801fc3', // admin
-  '8914de686ab28dc22f30d3d8e107ff6c', // ant.design
-]
+// 账号 → 明文密码映射
+const VALID_CREDENTIALS: Record<string, string> = {
+  admin: 'admin',
+  super: 'super',
+}
 
 const login = (options: { body?: string }) => {
   const body = getBody<LoginParams | LoginByMobileParams>(options)
@@ -41,16 +38,13 @@ const login = (options: { body?: string }) => {
   // ---- 账号 / 邮箱 + 密码登录 ----
   const { username, email, password } = body as LoginParams
   const account = username || email || ''
-  const accountOk =
-    VALID_USERNAMES.includes(account) ||
-    // 邮箱形式时，也允许 admin@example.com / super@example.com
-    /^(admin|super)@.+\..+$/i.test(account)
-  if (!accountOk || !VALID_PASSWORD_HASH.includes(password || '')) {
+  // 邮箱形式时取 @ 前的用户名部分匹配
+  const accountKey = account.includes('@') ? (account.split('@')[0] ?? '') : account
+  const expected = VALID_CREDENTIALS[accountKey]
+  if (!expected || password !== expected) {
     return failBuilder('账户或密码错误', 401, { isLogin: true })
   }
-  const who =
-    account.startsWith('super') || /^super@/.test(account) ? 'super' : 'admin'
-  return successLoginResult(who)
+  return successLoginResult(accountKey === 'super' ? 'super' : 'admin')
 }
 
 /** 构造登录成功的响应体 */

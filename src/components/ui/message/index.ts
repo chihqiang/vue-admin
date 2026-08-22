@@ -51,7 +51,8 @@ function ensureContainer() {
     vnode.appContext = appContext
   }
   render(vnode, container)
-  containerEl = vnode.component?.proxy
+  // 使用 exposed 而非 proxy 访问 defineExpose 暴露的方法，避免 proxy 代理链上 update 不可达
+  containerEl = vnode.component?.exposed
 }
 
 /** 移除消息 */

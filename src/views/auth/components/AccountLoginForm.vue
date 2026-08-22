@@ -31,14 +31,10 @@ function validateUsername() {
   return true
 }
 
-/** 校验密码 */
+/** 校验密码（仅校验非空，长度校验由后端负责） */
 function validatePassword() {
   if (!form.password) {
     errors.password = '请输入密码'
-    return false
-  }
-  if (form.password.length < 6) {
-    errors.password = '密码长度至少 6 位'
     return false
   }
   errors.password = undefined

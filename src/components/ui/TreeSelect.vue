@@ -65,13 +65,6 @@ interface FlatNode {
   hasChildren: boolean
 }
 
-/** 默认字段名（与 antd 一致） */
-const DEFAULT_FIELD_NAMES = {
-  value: 'value',
-  title: 'title',
-  children: 'children',
-}
-
 const props = withDefaults(
   defineProps<{
     /** v-model:value 选中值（单选 T / 多选 T[]） */
@@ -114,7 +107,8 @@ const props = withDefaults(
     notFoundContent: '暂无数据',
     status: undefined,
     listHeight: 256,
-    fieldNames: () => ({ ...DEFAULT_FIELD_NAMES }),
+    // 默认字段名（与 antd 一致），内联避免 defineProps 引用本地变量被 hoist
+    fieldNames: () => ({ value: 'value', title: 'title', children: 'children' }),
   },
 )
 

@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Plus, Edit, Trash2, Search } from '@lucide/vue'
-import { Card, Input, Table, Tag, Pagination, message } from '@/components/ui'
+import { Button, Card, Input, Table, Tag, Pagination, Statistic, Progress, message } from '@/components/ui'
 
 // ========== 统计信息 ==========
 const statsCards = [
@@ -98,9 +98,9 @@ const statusColorMap: Record<string, 'blue' | 'orange' | 'green'> = {
   done: 'green',
 }
 const progressBarColor: Record<string, string> = {
-  processing: 'bg-blue-500',
-  waiting: 'bg-orange-400',
-  done: 'bg-green-500',
+  processing: '#3b82f6',
+  waiting: '#fb923c',
+  done: '#22c55e',
 }
 </script>
 
@@ -116,7 +116,11 @@ const progressBarColor: Record<string, string> = {
           :class="{ 'border-l border-gray-100': i > 0 }"
         >
           <p class="text-sm text-gray-400 mb-1">{{ stat.label }}</p>
-          <p class="text-xl font-semibold text-gray-800">{{ stat.value }}</p>
+          <Statistic
+            :value="stat.value"
+            :formatter="(v: string | number) => String(v)"
+            :value-style="{ fontSize: '1.25rem', fontWeight: 600, color: '#1f2937' }"
+          />
         </div>
       </div>
     </Card>
@@ -127,19 +131,24 @@ const progressBarColor: Record<string, string> = {
       <template #extra>
         <div class="flex items-center gap-3">
           <div class="flex items-center border border-gray-200 rounded-md overflow-hidden">
-            <button
+            <Button
               v-for="opt in [
                 { value: 'all', label: '全部' },
                 { value: 'processing', label: '进行中' },
                 { value: 'waiting', label: '等待中' },
               ]"
               :key="opt.value"
-              class="px-3 py-1.5 text-xs transition-colors"
-              :class="statusFilter === opt.value ? 'text-blue-600 bg-blue-50 font-medium' : 'text-gray-500 hover:bg-gray-50'"
+              type="text"
+              size="sm"
+              :custom-class="
+                statusFilter === opt.value
+                  ? 'text-blue-600 bg-blue-50 font-medium rounded-none hover:bg-blue-50'
+                  : 'rounded-none hover:bg-gray-50'
+              "
               @click="statusFilter = opt.value as 'all' | 'processing' | 'waiting'"
             >
               {{ opt.label }}
-            </button>
+            </Button>
           </div>
           <Input v-model="searchText" placeholder="请输入" allow-clear custom-class="w-48">
             <template #prefix><Search :size="14" /></template>
@@ -149,13 +158,10 @@ const progressBarColor: Record<string, string> = {
 
       <!-- 新增按钮 -->
       <div class="p-6 pb-0">
-        <button
-          class="w-full py-2 border border-dashed border-gray-300 rounded-md text-sm text-gray-500 hover:text-blue-500 hover:border-blue-400 transition-colors flex items-center justify-center gap-1"
-          @click="handleAdd"
-        >
-          <Plus :size="14" />
+        <Button type="primary" block @click="handleAdd">
+          <template #icon><Plus :size="14" /></template>
           添加
-        </button>
+        </Button>
       </div>
 
       <!-- 通用表格 -->
@@ -187,31 +193,26 @@ const progressBarColor: Record<string, string> = {
             <span class="text-sm text-gray-600">{{ row.startAt }}</span>
           </template>
 
-          <!-- 进度列 -->
+          <!-- 进度列：用 Progress 组件，按状态显示不同颜色 -->
           <template #cell-progress="{ row }">
             <div class="w-full">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-xs text-gray-500">{{ row.progress }}%</span>
-              </div>
-              <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  class="h-full rounded-full transition-all"
-                  :class="progressBarColor[row.status]"
-                  :style="{ width: row.progress + '%' }"
-                ></div>
-              </div>
+              <Progress
+                :percent="row.progress"
+                size="md"
+                :stroke-color="progressBarColor[row.status]"
+              />
             </div>
           </template>
 
           <!-- 操作列 -->
           <template #cell-action="{ row }">
             <div class="flex items-center justify-center gap-2">
-              <button class="text-blue-500 hover:text-blue-600" @click="handleEdit(row)">
-                <Edit :size="16" />
-              </button>
-              <button class="text-red-500 hover:text-red-600" @click="handleDelete(row)">
-                <Trash2 :size="16" />
-              </button>
+              <Button type="text" size="sm" custom-class="text-blue-500 hover:text-blue-600" @click="handleEdit(row)">
+                <template #icon><Edit :size="16" /></template>
+              </Button>
+              <Button type="text" size="sm" danger custom-class="text-red-500 hover:text-red-600" @click="handleDelete(row)">
+                <template #icon><Trash2 :size="16" /></template>
+              </Button>
             </div>
           </template>
         </Table>

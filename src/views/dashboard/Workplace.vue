@@ -6,6 +6,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { Plus, ArrowRight } from '@lucide/vue'
+import { Avatar, Statistic, Divider, Card, Spin, Button } from '@/components/ui'
 import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -150,10 +151,9 @@ onMounted(loadData)
       <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
         <!-- 左侧：头像 + 问候 -->
         <div class="flex items-center gap-4">
-          <img
+          <Avatar
             :src="userStore.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'"
-            class="w-16 h-16 rounded-full bg-gray-100 flex-shrink-0"
-            alt="avatar"
+            :size="64"
           />
           <div>
             <div class="text-lg font-medium text-gray-800">
@@ -168,18 +168,15 @@ onMounted(loadData)
         <!-- 右侧：统计数据 -->
         <div class="flex items-center gap-8">
           <div class="text-center">
-            <div class="text-2xl font-semibold text-gray-800">56</div>
-            <div class="text-xs text-gray-500 mt-1">项目数</div>
+            <Statistic title="项目数" :value="56" :value-style="{ justifyContent: 'center' }" />
           </div>
-          <div class="w-px h-10 bg-gray-100" />
+          <Divider type="vertical" custom-class="h-10" />
           <div class="text-center">
-            <div class="text-2xl font-semibold text-gray-800">8 <span class="text-sm text-gray-400">/ 24</span></div>
-            <div class="text-xs text-gray-500 mt-1">团队内排名</div>
+            <Statistic title="团队内排名" :value="8" suffix="/ 24" :value-style="{ justifyContent: 'center' }" />
           </div>
-          <div class="w-px h-10 bg-gray-100" />
+          <Divider type="vertical" custom-class="h-10" />
           <div class="text-center">
-            <div class="text-2xl font-semibold text-gray-800">2,223</div>
-            <div class="text-xs text-gray-500 mt-1">项目访问</div>
+            <Statistic title="项目访问" :value="2223" :value-style="{ justifyContent: 'center' }" />
           </div>
         </div>
       </div>
@@ -190,21 +187,18 @@ onMounted(loadData)
       <!-- 左栏：项目 + 动态 -->
       <div class="xl:col-span-2 space-y-6">
         <!-- 进行中的项目 -->
-        <div class="bg-white rounded-lg border border-gray-100">
-          <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <span class="text-sm font-medium text-gray-700">进行中的项目</span>
+        <Card :body-style="{ padding: '0' }">
+          <template #title>进行中的项目</template>
+          <template #extra>
             <a class="text-sm text-blue-500 hover:text-blue-600 cursor-pointer flex items-center gap-1">
               全部项目 <ArrowRight :size="14" />
             </a>
-          </div>
+          </template>
 
           <!-- 项目卡片网格 -->
-          <div
-            v-if="loading"
-            class="px-6 py-4 text-center text-gray-400 text-sm"
-          >
-            加载中...
-          </div>
+          <Spin v-if="loading" tip="加载中...">
+            <div class="h-24"></div>
+          </Spin>
           <div v-else class="grid grid-cols-1 sm:grid-cols-2 divide-x divide-y divide-gray-50">
             <div
               v-for="item in projects"
@@ -227,14 +221,14 @@ onMounted(loadData)
               </div>
             </div>
           </div>
-        </div>
+        </Card>
 
         <!-- 动态 -->
-        <div class="bg-white rounded-lg border border-gray-100">
-          <div class="px-6 py-4 border-b border-gray-100">
-            <span class="text-sm font-medium text-gray-700">动态</span>
-          </div>
-          <div v-if="loading" class="px-6 py-4 text-center text-gray-400 text-sm">加载中...</div>
+        <Card :body-style="{ padding: '0' }">
+          <template #title>动态</template>
+          <Spin v-if="loading" tip="加载中...">
+            <div class="h-24"></div>
+          </Spin>
           <ul v-else class="px-6 py-2">
             <li
               v-for="(item, index) in activities"
@@ -242,11 +236,7 @@ onMounted(loadData)
               class="flex items-start gap-3 py-3 border-b border-gray-50 last:border-0"
             >
               <!-- 头像 -->
-              <img
-                :src="item.user.avatar"
-                class="w-8 h-8 rounded-full bg-gray-100 flex-shrink-0"
-                alt="avatar"
-              />
+              <Avatar :src="item.user.avatar" :size="32" />
               <!-- 内容 -->
               <div class="flex-1 min-w-0">
                 <p class="text-sm text-gray-700">
@@ -260,16 +250,14 @@ onMounted(loadData)
               </div>
             </li>
           </ul>
-        </div>
+        </Card>
       </div>
 
       <!-- 右栏：快速导航 + 雷达图 + 团队 -->
       <div class="space-y-6">
         <!-- 快速开始 / 便捷导航 -->
-        <div class="bg-white rounded-lg border border-gray-100">
-          <div class="px-6 py-4 border-b border-gray-100">
-            <span class="text-sm font-medium text-gray-700">快速开始 / 便捷导航</span>
-          </div>
+        <Card :body-style="{ padding: '0' }">
+          <template #title>快速开始 / 便捷导航</template>
           <div class="px-6 py-4 flex flex-wrap gap-3">
             <a
               v-for="link in quickLinks"
@@ -278,24 +266,22 @@ onMounted(loadData)
             >
               {{ link }}
             </a>
-            <button
-              class="inline-flex items-center gap-1 text-sm text-blue-500 border border-blue-300 rounded px-2 py-0.5 hover:bg-blue-50"
-            >
-              <Plus :size="12" />
+            <Button type="primary" size="sm">
+              <template #icon>
+                <Plus :size="13" />
+              </template>
               添加
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
 
         <!-- 雷达图 -->
-        <div class="bg-white rounded-lg border border-gray-100">
-          <div class="px-6 py-4 border-b border-gray-100">
-            <span class="text-sm font-medium text-gray-700">XX 指数</span>
-          </div>
+        <Card :body-style="{ padding: '0' }">
+          <template #title>XX 指数</template>
           <div class="px-6 py-4">
-            <div v-if="radarLoading" class="h-[340px] flex items-center justify-center text-gray-400 text-sm">
-              加载中...
-            </div>
+            <Spin v-if="radarLoading" tip="加载中...">
+              <div class="h-[340px]"></div>
+            </Spin>
             <VChart
               v-else
               :option="radarOption"
@@ -303,29 +289,25 @@ onMounted(loadData)
               autoresize
             />
           </div>
-        </div>
+        </Card>
 
         <!-- 团队 -->
-        <div class="bg-white rounded-lg border border-gray-100">
-          <div class="px-6 py-4 border-b border-gray-100">
-            <span class="text-sm font-medium text-gray-700">团队</span>
-          </div>
-          <div v-if="loading" class="px-6 py-4 text-center text-gray-400 text-sm">加载中...</div>
+        <Card :body-style="{ padding: '0' }">
+          <template #title>团队</template>
+          <Spin v-if="loading" tip="加载中...">
+            <div class="h-24"></div>
+          </Spin>
           <div v-else class="px-6 py-4 grid grid-cols-2 gap-4">
             <a
               v-for="(member, index) in teams"
               :key="index"
               class="flex items-center gap-2 hover:bg-gray-50 rounded p-1 transition-colors cursor-pointer"
             >
-              <img
-                :src="member.avatar"
-                class="w-7 h-7 rounded-full bg-gray-100 flex-shrink-0"
-                alt="avatar"
-              />
+              <Avatar :src="member.avatar" :size="28" />
               <span class="text-sm text-gray-700 truncate">{{ member.name }}</span>
             </a>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   </div>
