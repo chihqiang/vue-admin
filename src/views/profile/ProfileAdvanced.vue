@@ -8,7 +8,8 @@ import { ref, onMounted, nextTick } from 'vue'
 import { Plus, Star, ThumbsUp, MessageCircle, Download, Pencil, Share2, Ellipsis } from '@lucide/vue'
 import { Card, Tag, Button, Divider, Input } from '@/components/ui'
 import { useUserStore } from '@/stores/user'
-import request from '@/utils/request'
+import { getTeams } from '@/api/workplace'
+import type { TeamMember } from '@/types/workplace'
 
 const userStore = useUserStore()
 
@@ -44,19 +45,14 @@ function handleTagInputConfirm() {
 }
 
 // ========== 团队 ==========
-interface TeamMember {
-  name: string
-  avatar: string
-}
 const teams = ref<TeamMember[]>([])
 const teamLoading = ref(true)
 
 /** 获取团队列表 */
-async function getTeams() {
+async function fetchTeams() {
   teamLoading.value = true
   try {
-    const result = await request.get('/workplace/teams') as unknown as TeamMember[]
-    teams.value = result
+    teams.value = await getTeams()
   } finally {
     teamLoading.value = false
   }
@@ -179,7 +175,7 @@ function loadProjects() {
 
 // ========== 初始化 ==========
 onMounted(async () => {
-  await getTeams()
+  await fetchTeams()
   loadArticles()
   loadApps()
   loadProjects()

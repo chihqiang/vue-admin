@@ -1,17 +1,17 @@
-import { createVNode, render } from 'vue'
 import type { AppContext } from 'vue'
 import MessageContainer from './MessageContainer.vue'
+import { createFeedbackManager } from '@/components/ui/feedback/createFeedbackManager'
 
 /** 消息类型 */
-type MessageType = 'success' | 'info' | 'warning' | 'error' | 'loading'
+export type MessageType = 'success' | 'info' | 'warning' | 'error' | 'loading'
 
 /** 消息配置 */
-interface MessageConfig {
+export interface MessageConfig {
   /** 内容 */
   content: string
   /** 类型 */
   type?: MessageType
-  /** 自动关闭延时（毫秒），0 为不自动关闭 */
+  /** 自动关闭延时（秒），0 为不自动关闭 */
   duration?: number
   /** 唯一 key */
   key?: string | number
@@ -20,78 +20,26 @@ interface MessageConfig {
 }
 
 /** 单条消息实例 */
-interface MessageInstance {
+export interface MessageInstance {
   close: () => void
 }
 
-/** 全局容器实例 */
-let container: HTMLDivElement | null = null
-let appContext: AppContext | null = null
-
-/** 消息列表（响应式，通过 container 组件内部管理） */
-let messageList: MessageConfig[] = []
-let containerEl: any = null
-
-/** 生成唯一 ID */
-let seed = 0
-function genId() {
-  return `message_${++seed}`
+/** 容器内部使用的列表项（含注入的 key） */
+interface MessageItem extends MessageConfig {
+  key: string | number
 }
 
-/** 创建容器 */
-function ensureContainer() {
-  if (container) return
-
-  container = document.createElement('div')
-  container.className = 'message-container'
-  document.body.appendChild(container)
-
-  const vnode = createVNode(MessageContainer)
-  if (appContext) {
-    vnode.appContext = appContext
-  }
-  render(vnode, container)
-  // 使用 exposed 而非 proxy 访问 defineExpose 暴露的方法，避免 proxy 代理链上 update 不可达
-  containerEl = vnode.component?.exposed
-}
-
-/** 移除消息 */
-function removeMessage(key: string | number) {
-  messageList = messageList.filter((m) => m.key !== key)
-  containerEl?.update(messageList)
-}
+const manager = createFeedbackManager<MessageItem>({
+  container: MessageContainer,
+  containerClass: 'message-container',
+  idPrefix: 'message',
+  defaultDuration: 3,
+  defaultItem: { type: 'info' },
+})
 
 /** 打开一条消息 */
 function open(config: MessageConfig): MessageInstance {
-  ensureContainer()
-
-  const key = config.key ?? genId()
-  const duration = config.duration ?? 3
-
-  const message: MessageConfig = {
-    type: 'info',
-    ...config,
-    key,
-  }
-
-  messageList.push(message)
-  containerEl?.update(messageList)
-
-  // 自动关闭
-  let closeTimer: ReturnType<typeof setTimeout> | undefined
-  if (duration > 0) {
-    closeTimer = setTimeout(() => {
-      close()
-    }, duration * 1000)
-  }
-
-  function close() {
-    if (closeTimer) clearTimeout(closeTimer)
-    removeMessage(key)
-    config.onClose?.()
-  }
-
-  return { close }
+  return manager.open({ ...config }, config.duration)
 }
 
 /** 预设类型方法 */
@@ -115,18 +63,9 @@ const message = {
   /** 加载中（默认不自动关闭） */
   loading: (content: string, duration = 0) => typeOpen('loading', content, duration),
   /** 销毁指定消息 */
-  destroy: (key?: string | number) => {
-    if (key !== undefined) {
-      removeMessage(key)
-    } else {
-      messageList = []
-      containerEl?.update(messageList)
-    }
-  },
+  destroy: (key?: string | number) => manager.destroy(key),
   /** 设置应用上下文（用于注入全局配置等） */
-  setAppContext: (ctx: AppContext) => {
-    appContext = ctx
-  },
+  setAppContext: (ctx: AppContext) => manager.setAppContext(ctx),
 }
 
 export default message

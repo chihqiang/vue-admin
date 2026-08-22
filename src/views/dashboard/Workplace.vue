@@ -15,7 +15,13 @@ import { TooltipComponent, LegendComponent } from 'echarts/components'
 import type { EChartsOption } from 'echarts'
 import { useUserStore } from '@/stores/user'
 import { timeFix } from '@/utils/util'
-import request from '@/utils/request'
+import { getProjects, getActivity, getTeams, getRadar } from '@/api/workplace'
+import type {
+  WorkplaceProject,
+  WorkplaceActivity,
+  TeamMember,
+  RadarItem,
+} from '@/types/workplace'
 
 use([CanvasRenderer, RadarChart, TooltipComponent, LegendComponent])
 
@@ -26,35 +32,9 @@ const loading = ref(true)
 const radarLoading = ref(true)
 
 // ========== 数据 ==========
-interface Project {
-  id: string
-  cover: string
-  title: string
-  description: string
-  group: string
-  updatedAt: string
-}
-const projects = ref<Project[]>([])
-
-interface Activity {
-  user: { nickname: string; avatar: string }
-  project: { name: string; action: string; event: string }
-  time: string
-}
-const activities = ref<Activity[]>([])
-
-interface TeamMember {
-  name: string
-  avatar: string
-}
+const projects = ref<WorkplaceProject[]>([])
+const activities = ref<WorkplaceActivity[]>([])
 const teams = ref<TeamMember[]>([])
-
-interface RadarItem {
-  item: string
-  个人: number
-  团队: number
-  部门: number
-}
 const radarData = ref<RadarItem[]>([])
 
 // ========== 问候语 ==========
@@ -123,10 +103,10 @@ async function loadData() {
 
   try {
     const [projectsRes, activityRes, teamsRes, radarRes] = await Promise.all([
-      request.get<unknown, Project[]>('/workplace/projects'),
-      request.get<unknown, Activity[]>('/workplace/activity'),
-      request.get<unknown, TeamMember[]>('/workplace/teams'),
-      request.get<unknown, RadarItem[]>('/workplace/radar'),
+      getProjects(),
+      getActivity(),
+      getTeams(),
+      getRadar(),
     ])
 
     projects.value = projectsRes

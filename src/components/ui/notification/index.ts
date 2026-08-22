@@ -1,15 +1,15 @@
-import { createVNode, render } from 'vue'
 import type { AppContext, Component } from 'vue'
 import NotificationContainer from './NotificationContainer.vue'
+import { createFeedbackManager } from '@/components/ui/feedback/createFeedbackManager'
 
 /** 通知类型 */
-type NotificationType = 'success' | 'info' | 'warning' | 'error'
+export type NotificationType = 'success' | 'info' | 'warning' | 'error'
 
 /** 弹出位置 */
-type Placement = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight'
+export type Placement = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight'
 
 /** 通知配置 */
-interface NotificationConfig {
+export interface NotificationConfig {
   /** 标题 */
   title: string
   /** 描述内容 */
@@ -32,79 +32,33 @@ interface NotificationConfig {
   onBtnClick?: () => void
 }
 
-/** 全局容器实例 */
-let container: HTMLDivElement | null = null
-let appContext: AppContext | null = null
-let notificationList: NotificationConfig[] = []
-let containerEl: any = null
-
-/** 生成唯一 ID */
-let seed = 0
-function genId() {
-  return `notification_${++seed}`
+/** 单条通知实例 */
+export interface NotificationInstance {
+  close: () => void
 }
 
-/** 创建容器 */
-function ensureContainer() {
-  if (container) return
-
-  container = document.createElement('div')
-  container.className = 'notification-container'
-  document.body.appendChild(container)
-
-  const vnode = createVNode(NotificationContainer)
-  if (appContext) {
-    vnode.appContext = appContext
-  }
-  render(vnode, container)
-  // 使用 exposed 而非 proxy 访问 defineExpose 暴露的方法，避免 proxy 代理链上 update 不可达
-  containerEl = vnode.component?.exposed
+/** 容器内部使用的列表项（含注入的 key） */
+interface NotificationItem extends NotificationConfig {
+  key: string | number
 }
 
-/** 移除通知 */
-function removeNotification(key: string | number) {
-  notificationList = notificationList.filter((n) => n.key !== key)
-  containerEl?.update(notificationList)
-}
+const manager = createFeedbackManager<NotificationItem>({
+  container: NotificationContainer,
+  containerClass: 'notification-container',
+  idPrefix: 'notification',
+  defaultDuration: 4.5,
+  defaultItem: { placement: 'topRight' },
+  // 容器点击关闭按钮触发完整 close 流程（含定时器清理 + 移除）
+  closeOnContainerClose: true,
+})
 
 /** 打开一条通知 */
-function open(config: NotificationConfig) {
-  ensureContainer()
-
-  const key = config.key ?? genId()
-  const duration = config.duration ?? 4.5
-
-  const notification: NotificationConfig = {
-    placement: 'topRight',
-    ...config,
-    key,
-  }
-
-  notificationList.push(notification)
-  containerEl?.update(notificationList)
-
-  // 自动关闭
-  let closeTimer: ReturnType<typeof setTimeout> | undefined
-  if (duration > 0) {
-    closeTimer = setTimeout(() => {
-      close()
-    }, duration * 1000)
-  }
-
-  function close() {
-    if (closeTimer) clearTimeout(closeTimer)
-    removeNotification(key)
-    config.onClose?.()
-  }
-
-  // 覆写 onClose 为实际的 close（包含定时器清理）
-  notification.onClose = close
-
-  return { close }
+function open(config: NotificationConfig): NotificationInstance {
+  return manager.open({ ...config }, config.duration)
 }
 
 /** 预设类型方法 */
-function typeOpen(type: NotificationType, config: NotificationConfig) {
+function typeOpen(type: NotificationType, config: NotificationConfig): NotificationInstance {
   return open({ ...config, type })
 }
 
@@ -122,18 +76,9 @@ const notification = {
   /** 错误 */
   error: (config: NotificationConfig) => typeOpen('error', config),
   /** 销毁指定通知 */
-  destroy: (key?: string | number) => {
-    if (key !== undefined) {
-      removeNotification(key)
-    } else {
-      notificationList = []
-      containerEl?.update(notificationList)
-    }
-  },
+  destroy: (key?: string | number) => manager.destroy(key),
   /** 设置应用上下文 */
-  setAppContext: (ctx: AppContext) => {
-    appContext = ctx
-  },
+  setAppContext: (ctx: AppContext) => manager.setAppContext(ctx),
 }
 
 export default notification

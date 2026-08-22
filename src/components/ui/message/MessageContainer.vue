@@ -3,9 +3,15 @@
  * 全局提示容器组件
  * 固定在页面顶部中央，由 Message API 控制内容
  */
-import { ref, watch } from 'vue'
-import { CheckCircle, Info, AlertTriangle, XCircle, LoaderCircle, X } from '@lucide/vue'
+import { ref } from 'vue'
+import { LoaderCircle } from '@lucide/vue'
 import type { Component } from 'vue'
+import {
+  feedbackIconMap,
+  feedbackIconColorMap,
+  DEFAULT_FEEDBACK_ICON,
+  DEFAULT_FEEDBACK_ICON_COLOR,
+} from '@/components/ui/feedback/constants'
 
 interface MessageItem {
   content: string
@@ -17,22 +23,26 @@ interface MessageItem {
 /** 响应式消息列表 */
 const messages = ref<MessageItem[]>([])
 
-/** 图标映射 */
-const iconMap: Record<string, Component> = {
-  success: CheckCircle,
-  info: Info,
-  warning: AlertTriangle,
-  error: XCircle,
+/** 图标映射：复用共享语义映射，并扩展 loading */
+const messageIconMap: Record<string, Component> = {
+  ...feedbackIconMap,
   loading: LoaderCircle,
 }
 
-/** 颜色映射 */
-const iconColorMap: Record<string, string> = {
-  success: 'text-green-500',
-  info: 'text-blue-500',
-  warning: 'text-orange-500',
-  error: 'text-red-500',
+/** 图标颜色映射：复用共享语义映射，并扩展 loading */
+const messageIconColorMap: Record<string, string> = {
+  ...feedbackIconColorMap,
   loading: 'text-blue-500',
+}
+
+/** 按 type 获取图标（带 fallback） */
+function getIcon(type?: string): Component {
+  return messageIconMap[type || 'info'] || DEFAULT_FEEDBACK_ICON
+}
+
+/** 按 type 获取图标颜色（带 fallback） */
+function getColor(type?: string): string {
+  return messageIconColorMap[type || 'info'] || DEFAULT_FEEDBACK_ICON_COLOR
 }
 
 /** 暴露 update 方法给外部调用 */
@@ -60,11 +70,11 @@ defineExpose({ update })
         >
           <!-- 图标 -->
           <component
-            :is="iconMap[msg.type || 'info']"
+            :is="getIcon(msg.type)"
             :size="16"
             class="flex-shrink-0"
             :class="[
-              iconColorMap[msg.type || 'info'],
+              getColor(msg.type),
               msg.type === 'loading' ? 'animate-spin' : '',
             ]"
           />

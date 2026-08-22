@@ -1,15 +1,15 @@
-import { createVNode, render } from 'vue'
 import type { AppContext } from 'vue'
 import AlertContainer from './AlertContainer.vue'
+import { createFeedbackManager } from '@/components/ui/feedback/createFeedbackManager'
 
 /** 重导出内联 Alert 组件，保持 `import { Alert } from '@/components/ui'` 可用 */
 export { default as Alert } from './Alert.vue'
 
 /** 提示类型 */
-type AlertType = 'success' | 'info' | 'warning' | 'error'
+export type AlertType = 'success' | 'info' | 'warning' | 'error'
 
 /** 命令式 Alert 配置 */
-interface AlertConfig {
+export interface AlertConfig {
   /** 标题 */
   title?: string
   /** 描述内容 */
@@ -29,78 +29,26 @@ interface AlertConfig {
 }
 
 /** 单条 Alert 实例 */
-interface AlertInstance {
+export interface AlertInstance {
   close: () => void
 }
 
-/** 全局容器实例 */
-let container: HTMLDivElement | null = null
-let appContext: AppContext | null = null
-let alertList: AlertConfig[] = []
-let containerEl: any = null
-
-/** 生成唯一 ID */
-let seed = 0
-function genId() {
-  return `alert_${++seed}`
+/** 容器内部使用的列表项（含注入的 key） */
+interface AlertItem extends AlertConfig {
+  key: string | number
 }
 
-/** 创建容器 */
-function ensureContainer() {
-  if (container) return
-
-  container = document.createElement('div')
-  container.className = 'alert-container'
-  document.body.appendChild(container)
-
-  const vnode = createVNode(AlertContainer)
-  if (appContext) {
-    vnode.appContext = appContext
-  }
-  render(vnode, container)
-  // 使用 exposed 而非 proxy 访问 defineExpose 暴露的方法，避免 proxy 代理链上 update 不可达
-  containerEl = vnode.component?.exposed
-}
-
-/** 移除 Alert */
-function removeAlert(key: string | number) {
-  alertList = alertList.filter((a) => a.key !== key)
-  containerEl?.update(alertList)
-}
+const manager = createFeedbackManager<AlertItem>({
+  container: AlertContainer,
+  containerClass: 'alert-container',
+  idPrefix: 'alert',
+  defaultDuration: 0,
+  defaultItem: { type: 'info', showIcon: true, closable: true },
+})
 
 /** 打开一条 Alert */
 function open(config: AlertConfig): AlertInstance {
-  ensureContainer()
-
-  const key = config.key ?? genId()
-  const duration = config.duration ?? 0
-
-  const alert: AlertConfig = {
-    type: 'info',
-    showIcon: true,
-    closable: true,
-    ...config,
-    key,
-  }
-
-  alertList.push(alert)
-  containerEl?.update(alertList)
-
-  // 自动关闭
-  let closeTimer: ReturnType<typeof setTimeout> | undefined
-  if (duration > 0) {
-    closeTimer = setTimeout(() => {
-      close()
-    }, duration * 1000)
-  }
-
-  function close() {
-    if (closeTimer) clearTimeout(closeTimer)
-    removeAlert(key)
-    config.onClose?.()
-  }
-
-  return { close }
+  return manager.open({ ...config }, config.duration)
 }
 
 /** 预设类型方法 */
@@ -122,18 +70,9 @@ const alert = {
   /** 错误 */
   error: (config: AlertConfig) => typeOpen('error', config),
   /** 销毁指定 Alert */
-  destroy: (key?: string | number) => {
-    if (key !== undefined) {
-      removeAlert(key)
-    } else {
-      alertList = []
-      containerEl?.update(alertList)
-    }
-  },
+  destroy: (key?: string | number) => manager.destroy(key),
   /** 设置应用上下文（用于注入全局配置等） */
-  setAppContext: (ctx: AppContext) => {
-    appContext = ctx
-  },
+  setAppContext: (ctx: AppContext) => manager.setAppContext(ctx),
 }
 
 export default alert

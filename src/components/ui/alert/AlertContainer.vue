@@ -5,8 +5,12 @@
  * 与 Message 的区别：Alert 带标题+描述+背景色框，更显眼，默认不自动消失
  */
 import { ref } from 'vue'
-import { CheckCircle, Info, AlertTriangle, XCircle, X } from '@lucide/vue'
-import type { Component } from 'vue'
+import { X } from '@lucide/vue'
+import {
+  getFeedbackIcon,
+  getFeedbackIconColor,
+  getFeedbackBoxColor,
+} from '@/components/ui/feedback/constants'
 
 type AlertType = 'success' | 'info' | 'warning' | 'error'
 
@@ -22,32 +26,6 @@ interface AlertItem {
 
 /** 响应式 Alert 列表 */
 const alerts = ref<AlertItem[]>([])
-
-/** 图标映射 */
-const iconMap: Record<string, Component> = {
-  success: CheckCircle,
-  info: Info,
-  warning: AlertTriangle,
-  error: XCircle,
-}
-
-/** 颜色映射（背景 + 边框 + 文字 + 图标） */
-const colorMap: Record<string, { box: string; icon: string }> = {
-  success: { box: 'bg-green-50 border-green-200 text-green-600', icon: 'text-green-500' },
-  info: { box: 'bg-blue-50 border-blue-200 text-blue-600', icon: 'text-blue-500' },
-  warning: { box: 'bg-orange-50 border-orange-200 text-orange-600', icon: 'text-orange-500' },
-  error: { box: 'bg-red-50 border-red-200 text-red-600', icon: 'text-red-500' },
-}
-
-/** 获取颜色配置（带 fallback） */
-function getColor(type?: string) {
-  return colorMap[type || 'info'] || { box: 'bg-blue-50 border-blue-200 text-blue-600', icon: 'text-blue-500' }
-}
-
-/** 获取图标（带 fallback） */
-function getIcon(type?: string) {
-  return iconMap[type || 'info'] || Info
-}
 
 /** 暴露 update 方法给外部调用 */
 function update(list: AlertItem[]) {
@@ -71,15 +49,15 @@ defineExpose({ update })
           v-for="item in alerts"
           :key="item.key"
           class="w-full flex items-start gap-2.5 px-4 py-3 rounded-md border shadow-sm pointer-events-auto"
-          :class="getColor(item.type).box"
+          :class="getFeedbackBoxColor(item.type)"
         >
           <!-- 图标 -->
           <component
             v-if="item.showIcon !== false"
-            :is="getIcon(item.type)"
+            :is="getFeedbackIcon(item.type)"
             :size="18"
             class="flex-shrink-0 mt-0.5"
-            :class="getColor(item.type).icon"
+            :class="getFeedbackIconColor(item.type)"
           />
 
           <!-- 文字内容 -->

@@ -5,8 +5,12 @@
  * 与 Message 的区别：Notification 带标题+描述，更丰富的展示
  */
 import { ref } from 'vue'
-import { CheckCircle, Info, AlertTriangle, XCircle, X } from '@lucide/vue'
+import { X } from '@lucide/vue'
 import type { Component } from 'vue'
+import {
+  getFeedbackIcon,
+  getFeedbackIconColor,
+} from '@/components/ui/feedback/constants'
 
 type NotificationType = 'success' | 'info' | 'warning' | 'error'
 type Placement = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight'
@@ -27,22 +31,6 @@ interface NotificationItem {
 /** 响应式通知列表 */
 const notifications = ref<NotificationItem[]>([])
 
-/** 图标映射 */
-const iconMap: Record<string, Component> = {
-  success: CheckCircle,
-  info: Info,
-  warning: AlertTriangle,
-  error: XCircle,
-}
-
-/** 颜色映射 */
-const iconColorMap: Record<string, string> = {
-  success: 'text-green-500',
-  info: 'text-blue-500',
-  warning: 'text-orange-500',
-  error: 'text-red-500',
-}
-
 /** 定位样式 */
 const placementClass: Record<Placement, string> = {
   topLeft: 'top-5 left-5',
@@ -56,16 +44,12 @@ function getByPlacement(placement: Placement) {
   return notifications.value.filter((n) => (n.placement || 'topRight') === placement)
 }
 
-/** 暴露方法 */
+/** 暴露 update 方法给外部调用 */
 function update(list: NotificationItem[]) {
   notifications.value = list
 }
 
-function remove(key: string | number) {
-  notifications.value = notifications.value.filter((n) => n.key !== key)
-}
-
-defineExpose({ update, remove })
+defineExpose({ update })
 </script>
 
 <template>
@@ -93,10 +77,10 @@ defineExpose({ update, remove })
             <!-- 图标 -->
             <component
               v-if="item.icon || item.type"
-              :is="item.icon || iconMap[item.type || 'info']"
+              :is="item.icon || getFeedbackIcon(item.type)"
               :size="20"
               class="flex-shrink-0 mt-0.5"
-              :class="item.icon ? 'text-blue-500' : iconColorMap[item.type || 'info']"
+              :class="item.icon ? 'text-blue-500' : getFeedbackIconColor(item.type)"
             />
 
             <div class="flex-1 min-w-0">
