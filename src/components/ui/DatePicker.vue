@@ -117,6 +117,7 @@ function selectDay(dateStr: string) {
 function clearValue(e: MouseEvent) {
   e.stopPropagation()
   emit('update:modelValue', '')
+  emit('change', '')
 }
 
 function handleClickOutside(e: MouseEvent) {

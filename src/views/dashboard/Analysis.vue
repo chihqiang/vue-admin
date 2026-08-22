@@ -10,17 +10,16 @@ import { ref, computed, onMounted } from 'vue'
 import { Info, MoreHorizontal } from '@lucide/vue'
 
 // 基础组件
-import ChartCard from '@/components/Charts/ChartCard.vue'
-import Trend from '@/components/Trend/Trend.vue'
-import NumberInfo from '@/components/NumberInfo/NumberInfo.vue'
-import RankList from '@/components/Charts/RankList.vue'
-import MiniProgress from '@/components/Charts/MiniProgress.vue'
+import ChartCard from '@/components/charts/ChartCard.vue'
+import Trend from '@/components/trend/Trend.vue'
+import NumberInfo from '@/components/number-info/NumberInfo.vue'
+import RankList from '@/components/charts/RankList.vue'
+import MiniProgress from '@/components/charts/MiniProgress.vue'
 
-// 图表组件
-import MiniArea from '@/components/Charts/MiniArea.vue'
-import MiniBar from '@/components/Charts/MiniBar.vue'
-import MiniSmoothArea from '@/components/Charts/MiniSmoothArea.vue'
-import Bar from '@/components/Charts/Bar.vue'
+import MiniArea from '@/components/charts/MiniArea.vue'
+import MiniBar from '@/components/charts/MiniBar.vue'
+import MiniSmoothArea from '@/components/charts/MiniSmoothArea.vue'
+import Bar from '@/components/charts/Bar.vue'
 
 // 饼图用 ECharts
 import VChart from 'vue-echarts'

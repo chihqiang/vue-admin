@@ -14,9 +14,9 @@
  *     <button>悬停</button>
  *   </Popover>
  */
-import { ref, useSlots } from 'vue'
+import { ref, useSlots, onMounted, onBeforeUnmount } from 'vue'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     title?: string
     content?: string
@@ -33,6 +33,7 @@ withDefaults(
 
 const slots = useSlots()
 const visible = ref(false)
+const rootRef = ref<HTMLElement>()
 
 function show() {
   visible.value = true
@@ -45,6 +46,17 @@ function hide() {
 function toggle() {
   visible.value = !visible.value
 }
+
+/** trigger=click 时点击外部关闭（对齐 antd Popover 行为） */
+function handleDocumentClick(e: MouseEvent) {
+  if (props.trigger !== 'click' || !visible.value) return
+  if (rootRef.value && !rootRef.value.contains(e.target as Node)) {
+    hide()
+  }
+}
+
+onMounted(() => document.addEventListener('click', handleDocumentClick))
+onBeforeUnmount(() => document.removeEventListener('click', handleDocumentClick))
 
 const placementClass: Record<string, string> = {
   top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
@@ -60,12 +72,13 @@ const placementClass: Record<string, string> = {
 
 <template>
   <div
+    ref="rootRef"
     class="relative inline-block"
     @mouseenter="trigger === 'hover' && show()"
     @mouseleave="trigger === 'hover' && hide()"
     @click="trigger === 'click' && toggle()"
-    @focus="trigger === 'focus' && show()"
-    @blur="trigger === 'focus' && hide()"
+    @focusin="trigger === 'focus' && show()"
+    @focusout="trigger === 'focus' && hide()"
   >
     <slot />
 

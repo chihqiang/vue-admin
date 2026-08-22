@@ -3,13 +3,14 @@
  * 单选框 Radio
  *
  * 特性：
- * - v-model:value 双向绑定
- * - value: 当前 radio 的值（与 group 配合使用）
+ * - v-model 双向绑定（绑定"组内当前选中的值"）
+ * - value：该 radio 自身的标识值（用于与 modelValue 比较判断是否选中）
  * - disabled
  * - #default 自定义文字
  *
- * 单独使用：
- *   <Radio v-model:value="val" :value="1">选项一</Radio>
+ * 组内单选用法：
+ *   <Radio v-model="selected" :value="1">选项一</Radio>
+ *   <Radio v-model="selected" :value="2">选项二</Radio>
  *
  * 事件：
  * - @change: 值变化

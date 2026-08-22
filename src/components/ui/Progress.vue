@@ -40,11 +40,13 @@ const props = withDefaults(
 
 const emit = defineEmits<{ complete: [] }>()
 
+// immediate：组件挂载时若 percent 已 >= 100（完成态加载）也触发 complete
 watch(
   () => props.percent,
   (val) => {
     if (val >= 100) emit('complete')
   },
+  { immediate: true },
 )
 
 const slots = useSlots()

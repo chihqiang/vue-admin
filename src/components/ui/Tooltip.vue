@@ -14,9 +14,9 @@
  *     <button>悬停看提示</button>
  *   </Tooltip>
  */
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     content?: string
     placement?: 'top' | 'bottom' | 'left' | 'right'
@@ -30,6 +30,7 @@ withDefaults(
 )
 
 const visible = ref(false)
+const rootRef = ref<HTMLElement>()
 
 function show() {
   visible.value = true
@@ -42,6 +43,17 @@ function hide() {
 function toggle() {
   visible.value = !visible.value
 }
+
+/** trigger=click 时点击外部关闭（对齐 antd Tooltip 行为） */
+function handleDocumentClick(e: MouseEvent) {
+  if (props.trigger !== 'click' || !visible.value) return
+  if (rootRef.value && !rootRef.value.contains(e.target as Node)) {
+    hide()
+  }
+}
+
+onMounted(() => document.addEventListener('click', handleDocumentClick))
+onBeforeUnmount(() => document.removeEventListener('click', handleDocumentClick))
 
 /** 定位样式 */
 const placementClass = {
@@ -62,6 +74,7 @@ const arrowClass = {
 
 <template>
   <div
+    ref="rootRef"
     class="relative inline-block"
     @mouseenter="trigger === 'hover' && show()"
     @mouseleave="trigger === 'hover' && hide()"

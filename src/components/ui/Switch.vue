@@ -12,6 +12,7 @@
  * 事件：
  * - @change: 值变化
  */
+import { computed } from 'vue'
 import { LoaderCircle } from '@lucide/vue'
 
 const props = withDefaults(
@@ -45,10 +46,12 @@ function toggle() {
   emit('change', val)
 }
 
-// 尺寸
-const sizeClass = props.size === 'sm'
-  ? { wrap: 'w-9 h-5', thumb: 'w-4 h-4', translate: 'translate-x-4', text: 'text-xs' }
-  : { wrap: 'w-11 h-6', thumb: 'w-5 h-5', translate: 'translate-x-5', text: 'text-xs' }
+// 尺寸（computed 响应式，props.size 变化时同步更新）
+const sizeClass = computed(() =>
+  props.size === 'sm'
+    ? { wrap: 'w-9 h-5', thumb: 'w-4 h-4', translate: 'translate-x-4', text: 'text-xs' }
+    : { wrap: 'w-11 h-6', thumb: 'w-5 h-5', translate: 'translate-x-5', text: 'text-xs' },
+)
 </script>
 
 <template>

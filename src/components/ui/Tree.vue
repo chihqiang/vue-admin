@@ -148,7 +148,12 @@ function toggleCheck(key: string | number, node: TreeNode) {
           :default-expand-all="false"
           :default-selected-key="''"
           @select="(k, n) => emit('select', k, n)"
-          @check="(keys) => emit('check', keys)"
+          @check="(childKeys) => {
+            // 合并子级返回的 keys 与自身 checkedKeys，保证消费方能拿到全树完整选中键列表
+            // 注意：模板中 ref 自动解包，checkedKeys 已是 Set 实例，无需 .value
+            const merged = new Set([...checkedKeys, ...childKeys])
+            emit('check', [...merged])
+          }"
         />
       </div>
     </li>

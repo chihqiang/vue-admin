@@ -49,6 +49,11 @@ withDefaults(
       <slot name="description">{{ description }}</slot>
     </p>
 
+    <!-- 默认插槽：内容下方额外区域 -->
+    <div v-if="$slots.default" class="mt-3">
+      <slot />
+    </div>
+
     <!-- 操作区 -->
     <div v-if="$slots.action" class="mt-3">
       <slot name="action" />

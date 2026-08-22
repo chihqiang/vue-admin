@@ -20,7 +20,7 @@
  * - @exceed: 超出限制 (files, fileList)
  * - @before-upload: 上传前钩子 (file) => boolean
  */
-import { ref, useSlots } from 'vue'
+import { ref, useSlots, onBeforeUnmount } from 'vue'
 import { Upload as UploadIcon, X, File as FileIcon, Check, AlertCircle } from '@lucide/vue'
 
 interface UploadFile {
@@ -41,6 +41,8 @@ const props = withDefaults(
     maxSize?: number
     limit?: number
     listType?: 'text' | 'picture'
+    /** 上传前钩子；返回 false / Promise<false> 取消上传 */
+    beforeUpload?: (file: File) => boolean | Promise<boolean>
   }>(),
   {
     accept: '',
@@ -49,6 +51,7 @@ const props = withDefaults(
     maxSize: 10,
     limit: 0,
     listType: 'text',
+    beforeUpload: undefined,
   },
 )
 
@@ -67,12 +70,15 @@ const fileList = ref<UploadFile[]>([])
 
 let seed = 0
 
+/** 上传定时器数组；卸载时统一清理，避免在已卸载组件上修改 ref / emit */
+const uploadTimers: ReturnType<typeof setTimeout>[] = []
+
 function handleClick() {
   if (props.disabled) return
   inputRef.value?.click()
 }
 
-function handleChange(e: Event) {
+async function handleChange(e: Event) {
   const target = e.target as HTMLInputElement
   if (!target.files) return
 
@@ -85,14 +91,21 @@ function handleChange(e: Event) {
     return
   }
 
-  files.forEach((file) => {
+  // for...of 以支持 await（beforeUpload 可能异步）
+  for (const file of files) {
     // 大小限制
     if (file.size > props.maxSize * 1024 * 1024) {
       emit('error', { uid: `_${++seed}`, name: file.name, size: file.size, type: file.type, status: 'error' }, new Error('文件大小超出限制'))
-      return
+      continue
     }
 
+    // 事件通知（不依赖返回值，无法用作取消信号）
     emit('before-upload', file)
+    // 函数 prop：返回 false 则取消上传
+    if (props.beforeUpload) {
+      const result = await props.beforeUpload(file)
+      if (result === false) continue
+    }
 
     const uploadFile: UploadFile = {
       uid: `_${++seed}`,
@@ -107,13 +120,14 @@ function handleChange(e: Event) {
     emit('change', fileList.value)
 
     // 模拟上传（实际使用时替换为真实上传逻辑）
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       uploadFile.status = 'success'
       uploadFile.url = URL.createObjectURL(file)
       emit('success', uploadFile, fileList.value)
       emit('change', fileList.value)
     }, 1000)
-  })
+    uploadTimers.push(timer)
+  }
 
   target.value = ''
 }
@@ -121,6 +135,8 @@ function handleChange(e: Event) {
 function removeFile(uid: string) {
   const file = fileList.value.find((f) => f.uid === uid)
   if (!file) return
+  // 释放对象 URL，避免 Blob 数据无法 GC
+  if (file.url) URL.revokeObjectURL(file.url)
   fileList.value = fileList.value.filter((f) => f.uid !== uid)
   emit('remove', file, fileList.value)
   emit('change', fileList.value)
@@ -131,6 +147,15 @@ function formatSize(bytes: number) {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`
 }
+
+// 卸载时清理：上传定时器 + 释放所有对象 URL
+onBeforeUnmount(() => {
+  uploadTimers.forEach((t) => clearTimeout(t))
+  uploadTimers.length = 0
+  fileList.value.forEach((f) => {
+    if (f.url) URL.revokeObjectURL(f.url)
+  })
+})
 </script>
 
 <template>

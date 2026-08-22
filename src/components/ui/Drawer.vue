@@ -17,7 +17,7 @@
  * 事件：
  * - @close: 完全关闭后
  */
-import { ref, watch, nextTick, useSlots } from 'vue'
+import { ref, watch, nextTick, useSlots, onBeforeUnmount } from 'vue'
 import { X } from '@lucide/vue'
 
 const props = withDefaults(
@@ -51,23 +51,39 @@ const emit = defineEmits<{
 const slots = useSlots()
 const innerVisible = ref(false)
 const shouldRender = ref(false)
+/** 标记是否曾经打开过；用于避免 immediate watch 在挂载时(open=false)误触发 close 事件 */
+let hasOpened = false
+/** 关闭动画定时器；卸载时清理，避免在已卸载组件上修改 ref / emit */
+let closeTimer: number | null = null
 
 watch(
   () => props.open,
   (val) => {
     if (val) {
+      // 打开：渲染 dom → 下一帧触发进入动画
       shouldRender.value = true
+      hasOpened = true
       nextTick(() => (innerVisible.value = true))
-    } else {
+    } else if (hasOpened) {
+      // 关闭：先触发离开动画，300ms 后再 emit close；destroyOnClose=true 时销毁内容
+      // hasOpened 守卫避免组件挂载时 immediate 触发本分支误发 close
       innerVisible.value = false
-      setTimeout(() => {
-        shouldRender.value = false
+      if (closeTimer) window.clearTimeout(closeTimer)
+      closeTimer = window.setTimeout(() => {
+        if (props.destroyOnClose) {
+          shouldRender.value = false
+        }
         emit('close')
+        closeTimer = null
       }, 300)
     }
   },
   { immediate: true },
 )
+
+onBeforeUnmount(() => {
+  if (closeTimer) window.clearTimeout(closeTimer)
+})
 
 function close() {
   emit('update:open', false)
@@ -118,9 +134,9 @@ const panelClass = {
             </button>
           </div>
 
-          <!-- 内容区 -->
+          <!-- 内容区：destroyOnClose=true 时跟随 shouldRender 在动画结束后销毁，避免动画期内容先消失 -->
           <div class="flex-1 overflow-auto px-5 py-4">
-            <slot v-if="!destroyOnClose || innerVisible" />
+            <slot v-if="!destroyOnClose || shouldRender" />
           </div>
 
           <!-- 底部 -->

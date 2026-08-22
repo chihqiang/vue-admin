@@ -13,7 +13,7 @@
  *     <div>内容</div>
  *   </Spin>
  */
-import { ref, watch } from 'vue'
+import { ref, watch, computed, onBeforeUnmount } from 'vue'
 import { LoaderCircle } from '@lucide/vue'
 
 const props = withDefaults(
@@ -46,7 +46,15 @@ watch(
   },
 )
 
-const sizePx = typeof props.size === 'number' ? props.size : { sm: 14, md: 20, lg: 32 }[props.size]
+// 卸载时清理延迟定时器，避免在已卸载组件上修改 visible
+onBeforeUnmount(() => {
+  if (delayTimer) clearTimeout(delayTimer)
+})
+
+// 尺寸（computed 响应式，props.size 变化时同步更新）
+const sizePx = computed(() =>
+  typeof props.size === 'number' ? props.size : { sm: 14, md: 20, lg: 32 }[props.size],
+)
 </script>
 
 <template>
