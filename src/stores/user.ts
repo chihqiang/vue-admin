@@ -70,7 +70,7 @@ export const useUserStore = defineStore('user', () => {
     if (!token.value) return false
     const expireRaw = storageGet(TOKEN_EXPIRE_KEY)
     const expire = Number(expireRaw || 0)
-    if (!expire) return true // 老数据，无过期时间，兼容处理
+    if (!expire) return false // 无过期时间视为无效，强制重新登录
     return Date.now() < expire
   })
 
@@ -126,8 +126,12 @@ export const useUserStore = defineStore('user', () => {
 
   /**
    * 获取动态路由菜单数据
-   * - 优先从后端 /user/menus 获取
-   * - 失败时降级到本地 routes.ts 兜底数据
+   *
+   * 策略：
+   *   - 开发环境：直接使用本地 routes.ts 的 asyncRoutes，不走网络请求，
+   *     避免依赖 mock 时序，调试更简单可靠。
+   *   - 生产环境：从后端 /user/menus 接口获取，失败时抛出异常，
+   *     由路由守卫捕获并跳转到错误页，不降级到本地路由。
    *
    * Store 只负责获取和存储菜单数据，不负责路由注册。
    * 路由注册由 router 守卫调用此方法后自行处理。
@@ -137,19 +141,16 @@ export const useUserStore = defineStore('user', () => {
       return menus.value
     }
 
-    try {
-      const menuList = await getUserMenus()
-      console.log('[userStore] getUserMenus 返回:', menuList)
-      // 防御性检查：确保返回的是数组
-      if (Array.isArray(menuList) && menuList.length > 0) {
-        menus.value = menuList
-      } else {
-        console.warn('[userStore] getUserMenus 返回数据非数组或为空，降级到本地路由:', menuList)
-        menus.value = asyncRoutes
-      }
-    } catch (err) {
-      console.warn('[userStore] getUserMenus 失败，降级到本地路由:', err)
+    if (import.meta.env.DEV) {
+      // 开发环境：直接用本地路由数据
       menus.value = asyncRoutes
+    } else {
+      // 生产环境：从后端获取，失败直接抛异常，不降级
+      const menuList = await getUserMenus()
+      if (!Array.isArray(menuList) || menuList.length === 0) {
+        throw new Error('后端菜单数据为空或格式不正确')
+      }
+      menus.value = menuList
     }
 
     dynamicRoutesLoaded.value = true

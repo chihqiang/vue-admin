@@ -168,7 +168,7 @@ router.beforeEach(async (to) => {
       console.error('[router] loadDynamicRoutes failed:', err)
       doneProgress()
       alert.error({ title: '加载失败', description: '菜单加载失败，请刷新重试' })
-      return { path: '/login' }
+      return { path: '/500' }
     }
   }
 

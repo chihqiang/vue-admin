@@ -23,6 +23,9 @@ const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
+/** 是否开发环境（控制测试账号提示显示） */
+const isDev = import.meta.env.DEV
+
 // ========== Tab 切换 ==========
 /** 当前激活的 Tab：tab1=账号密码登录，tab2=手机号登录 */
 const activeTab = ref<'tab1' | 'tab2'>('tab1')
@@ -174,6 +177,16 @@ async function handleSubmit() {
 
           <!-- 第三方登录 + 注册 -->
           <SocialLogin />
+
+          <!-- 测试账号提示（仅开发环境显示） -->
+          <div
+            v-if="isDev"
+            class="mt-5 rounded-lg bg-blue-50/80 p-3 text-[12px] leading-relaxed text-blue-600 ring-1 ring-blue-200/60"
+          >
+            <p class="mb-1 font-medium">Mock 环境测试账号：</p>
+            <p>超级管理员：<code class="font-mono">super</code> / <code class="font-mono">super</code>（所有权限）</p>
+            <p>普通用户：<code class="font-mono">user</code> / <code class="font-mono">user</code>（无系统管理/日志）</p>
+          </div>
         </section>
       </main>
 

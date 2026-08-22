@@ -2,9 +2,9 @@
  * 认证相关 Mock：登录 / 登出 / 短信验证码 / 两步验证开关
  *
  * 账号密码登录规则（明文，方便测试）：
- * - 用户名：admin   密码：admin
- * - 用户名：super   密码：super
- * - 也支持邮箱形式：admin@example.com / super@example.com，密码同上
+ * - 用户名：super   密码：super   （超级管理员，拥有所有模块权限）
+ * - 用户名：user    密码：user    （普通用户，仅基础权限，无系统管理/日志）
+ * - 也支持邮箱形式：super@example.com / user@example.com，密码同上
  *
  * 手机号登录规则：
  * - 任意格式正确的 11 位手机号 + 验证码 123456 即可成功（实际发送的验证码会由 mock 随机返回）
@@ -15,8 +15,8 @@ import type { LoginParams, LoginByMobileParams, RegisterParams } from '@/api/log
 
 // 账号 → 明文密码映射
 const VALID_CREDENTIALS: Record<string, string> = {
-  admin: 'admin',
   super: 'super',
+  user: 'user',
 }
 
 const login = (options: { body?: string }) => {
@@ -32,7 +32,7 @@ const login = (options: { body?: string }) => {
         isLogin: true,
       })
     }
-    return successLoginResult('admin')
+    return successLoginResult('super')
   }
 
   // ---- 账号 / 邮箱 + 密码登录 ----
@@ -44,12 +44,13 @@ const login = (options: { body?: string }) => {
   if (!expected || password !== expected) {
     return failBuilder('账户或密码错误', 401, { isLogin: true })
   }
-  return successLoginResult(accountKey === 'super' ? 'super' : 'admin')
+  const who: 'super' | 'user' = accountKey === 'user' ? 'user' : 'super'
+  return successLoginResult(who)
 }
 
 /** 构造登录成功的响应体 */
-function successLoginResult(who: 'admin' | 'super') {
-  const name = who === 'admin' ? '系统管理员' : '超级管理员'
+function successLoginResult(who: 'super' | 'user') {
+  const name = who === 'super' ? '超级管理员' : '普通用户'
   return builder(
     {
       id: Mock.mock('@guid'),
@@ -60,7 +61,7 @@ function successLoginResult(who: 'admin' | 'super') {
         'https://api.dicebear.com/7.x/avataaars/svg?seed=' +
         encodeURIComponent(who),
       status: 1,
-      telephone: who === 'admin' ? '13800000001' : '13900000002',
+      telephone: who === 'super' ? '13900000002' : '13700000003',
       lastLoginIp: Mock.mock(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/),
       lastLoginTime: Date.now(),
       creatorId: 'system',
@@ -136,7 +137,7 @@ const register = (options: { body?: string }) => {
       creatorId: 'system',
       createTime: Date.now(),
       deleted: 0,
-      roleId: 'admin',
+      roleId: 'super',
       lang: 'zh-CN',
       token: `mock-token-${username}-${Date.now()}`,
     },

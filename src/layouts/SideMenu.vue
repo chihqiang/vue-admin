@@ -12,6 +12,7 @@ import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import * as Icons from '@/utils/lucide'
 import { useUserStore } from '@/stores/user'
+import { hasPermission } from '@/utils/permission'
 import { asyncRoutes } from '@/router/routes'
 import type { AsyncMenuItem } from '@/router/asyncRoutes'
 
@@ -27,9 +28,18 @@ const menuTree = computed<AsyncMenuItem[]>(() => {
   return userStore.menus.length > 0 ? userStore.menus : asyncRoutes
 })
 
-/** 过滤掉 hideInMenu 的菜单项 */
+/** 过滤掉 hideInMenu 且无权限的菜单项，以及所有子菜单都被过滤掉的一级菜单 */
 const visibleMenus = computed(() =>
-  menuTree.value.filter((m) => !m.hideInMenu),
+  menuTree.value.filter((m) => {
+    if (m.hideInMenu) return false
+    // 有子菜单时，检查是否至少有一个子菜单有权限
+    if (m.children && m.children.length > 0) {
+      return m.children.some(
+        (c) => !c.hideInMenu && hasPermission(userStore.permissions, c.permission || ''),
+      )
+    }
+    return true
+  }),
 )
 
 /** 当前展开的一级菜单 path 列表（手风琴模式：一次只展开一个） */
@@ -92,9 +102,11 @@ function isChildActive(child: AsyncMenuItem): boolean {
   return route.path === child.path || route.path.startsWith(child.path + '/')
 }
 
-/** 过滤可见的子菜单 */
+/** 过滤可见的子菜单（hideInMenu + 权限） */
 function visibleChildren(item: AsyncMenuItem): AsyncMenuItem[] {
-  return (item.children ?? []).filter((c) => !c.hideInMenu)
+  return (item.children ?? []).filter(
+    (c) => !c.hideInMenu && hasPermission(userStore.permissions, c.permission || ''),
+  )
 }
 </script>
 
