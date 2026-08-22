@@ -5,9 +5,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Search, Star, ThumbsUp, MessageCircle, Download, Pencil, Share2 } from '@lucide/vue'
-import PageCard from '@/components/PageCard.vue'
-import SearchInput from '@/components/SearchInput.vue'
-import EmptyState from '@/components/EmptyState.vue'
+import { Card, Input, Empty, Tag } from '@/components/ui'
 
 // ========== 搜索 ==========
 const searchText = ref('')
@@ -144,10 +142,12 @@ const isEmpty = computed(() => {
 <template>
   <div class="min-h-full bg-gray-50 p-6 space-y-6">
     <!-- 搜索区域 -->
-    <PageCard>
+    <Card>
       <!-- 大搜索框 -->
       <div class="max-w-xl mx-auto">
-        <SearchInput v-model="searchText" placeholder="请输入搜索关键词" custom-class="w-full" />
+        <Input v-model="searchText" placeholder="请输入搜索关键词" allow-clear custom-class="w-full">
+          <template #prefix><Search :size="14" /></template>
+        </Input>
       </div>
       <!-- Tab -->
       <div class="flex items-center justify-center gap-6 mt-4 border-b border-gray-100">
@@ -165,13 +165,13 @@ const isEmpty = computed(() => {
           {{ tab.label }}
         </button>
       </div>
-    </PageCard>
+    </Card>
 
     <!-- 内容区：左筛选 + 右列表 -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <!-- 左侧筛选 -->
       <div class="lg:col-span-1">
-        <PageCard title="分类筛选">
+        <Card title="分类筛选">
           <div v-if="currentCategories.length > 0" class="space-y-1">
             <button
               v-for="cat in currentCategories"
@@ -188,14 +188,17 @@ const isEmpty = computed(() => {
             </button>
           </div>
           <p v-else class="text-sm text-gray-400">暂无分类筛选</p>
-        </PageCard>
+        </Card>
       </div>
 
       <!-- 右侧列表 -->
       <div class="lg:col-span-3">
-        <PageCard>
+        <Card>
+          <!-- 空状态 -->
+          <Empty v-if="isEmpty" />
+
           <!-- 文章列表 -->
-          <div v-if="activeTab === 'article'">
+          <div v-else-if="activeTab === 'article'">
             <div class="space-y-6">
               <div
                 v-for="item in filteredArticles"
@@ -204,7 +207,7 @@ const isEmpty = computed(() => {
               >
                 <h4 class="text-base font-medium text-gray-800 hover:text-blue-500 cursor-pointer mb-2">{{ item.title }}</h4>
                 <div class="flex gap-2 mb-2">
-                  <span v-for="tag in item.tags" :key="tag" class="px-2 py-0.5 text-xs text-blue-600 bg-blue-50 rounded">{{ tag }}</span>
+                  <Tag v-for="tag in item.tags" :key="tag" color="blue" size="sm">{{ tag }}</Tag>
                 </div>
                 <p class="text-sm text-gray-500 leading-relaxed mb-3">{{ item.description }}</p>
                 <div class="flex items-center gap-2 mb-3">
@@ -283,10 +286,7 @@ const isEmpty = computed(() => {
               </div>
             </div>
           </div>
-
-          <!-- 空状态 -->
-          <EmptyState v-if="isEmpty" />
-        </PageCard>
+        </Card>
       </div>
     </div>
   </div>

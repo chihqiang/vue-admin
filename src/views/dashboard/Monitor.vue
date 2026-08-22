@@ -8,18 +8,25 @@ import * as echarts from 'echarts/core'
 import { LineChart, BarChart, PieChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent, LegendComponent, TitleComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
-import { Activity, TrendingUp, DollarSign, Users, Server, AlertTriangle, CheckCircle } from '@lucide/vue'
-import StatCard from '@/components/StatCard.vue'
-import PageCard from '@/components/PageCard.vue'
+import { Activity, TrendingUp, DollarSign, Users, Server, AlertTriangle, CheckCircle, ArrowUp, ArrowDown } from '@lucide/vue'
+import { Card } from '@/components/ui'
+import type { Component } from 'vue'
 
 echarts.use([LineChart, BarChart, PieChart, GridComponent, TooltipComponent, LegendComponent, TitleComponent, CanvasRenderer])
 
 // ========== 顶部统计卡片 ==========
+// 用 Card 组合实现，每张卡含图标、标签、数值、趋势
+const iconColorMap: Record<string, string> = {
+  blue: 'bg-blue-50 text-blue-500',
+  green: 'bg-green-50 text-green-500',
+  purple: 'bg-purple-50 text-purple-500',
+  orange: 'bg-orange-50 text-orange-500',
+}
 const statsCards = [
-  { label: '总访问量', value: '126,560', icon: Users, color: 'blue' as const, trend: '12%', trendUp: true },
-  { label: '总销售额', value: '￥328,752', icon: DollarSign, color: 'green' as const, trend: '8%', trendUp: true },
-  { label: '活跃用户', value: '8,254', icon: Activity, color: 'purple' as const, trend: '3%', trendUp: false },
-  { label: '服务器数', value: '32/36', icon: Server, color: 'orange' as const, trend: '2台下线', trendUp: false },
+  { label: '总访问量', value: '126,560', icon: Users as Component, color: 'blue', trend: '12%', trendUp: true },
+  { label: '总销售额', value: '￥328,752', icon: DollarSign as Component, color: 'green', trend: '8%', trendUp: true },
+  { label: '活跃用户', value: '8,254', icon: Activity as Component, color: 'purple', trend: '3%', trendUp: false },
+  { label: '服务器数', value: '32/36', icon: Server as Component, color: 'orange', trend: '2台下线', trendUp: false },
 ]
 
 // ========== 活动公告列表 ==========
@@ -193,48 +200,59 @@ const activityColorMap: Record<string, string> = {
   <div class="min-h-full bg-gray-50 p-6 space-y-6">
     <!-- ========== 顶部统计卡片 ========== -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <StatCard
-        v-for="card in statsCards"
-        :key="card.label"
-        :label="card.label"
-        :value="card.value"
-        :icon="card.icon"
-        :color="card.color"
-        :trend="card.trend"
-        :trend-up="card.trendUp"
-      />
+      <Card v-for="card in statsCards" :key="card.label">
+        <div class="flex items-center gap-4">
+          <!-- 图标 -->
+          <div class="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" :class="iconColorMap[card.color]">
+            <component :is="card.icon" :size="22" />
+          </div>
+          <!-- 文字内容 -->
+          <div class="flex-1 min-w-0">
+            <p class="text-sm text-gray-400 mb-1">{{ card.label }}</p>
+            <p class="text-xl font-semibold text-gray-800">{{ card.value }}</p>
+          </div>
+          <!-- 趋势 -->
+          <span
+            class="flex items-center gap-0.5 text-xs"
+            :class="card.trendUp ? 'text-green-500' : 'text-red-500'"
+          >
+            <component :is="card.trendUp ? ArrowUp : ArrowDown" :size="12" />
+            {{ card.trend }}
+          </span>
+        </div>
+      </Card>
     </div>
 
     <!-- ========== 图表区域 ========== -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- 访问量趋势 -->
-      <PageCard>
-        <template #header>
+      <Card>
+        <template #title>
           <h3 class="text-base font-medium text-gray-800 flex items-center gap-2">
             <TrendingUp :size="16" class="text-blue-500" />
             访问量趋势
           </h3>
         </template>
         <div ref="visitChartRef" style="width: 100%; height: 260px;"></div>
-      </PageCard>
+      </Card>
 
       <!-- 销售额 -->
-      <PageCard>
-        <template #header>
+      <Card>
+        <template #title>
           <h3 class="text-base font-medium text-gray-800 flex items-center gap-2">
             <DollarSign :size="16" class="text-green-500" />
             本周销售额
           </h3>
         </template>
         <div ref="saleChartRef" style="width: 100%; height: 260px;"></div>
-      </PageCard>
+      </Card>
     </div>
 
     <!-- ========== 底部：活动公告 + 实时排名 + 访问来源 ========== -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- 活动公告 -->
-      <PageCard>
-        <template #header>
+      <Card>
+        <template #title>
           <h3 class="text-base font-medium text-gray-800 flex items-center gap-2">
             <Activity :size="16" class="text-blue-500" />
             实时活动
@@ -264,10 +282,10 @@ const activityColorMap: Record<string, string> = {
             </div>
           </div>
         </div>
-      </PageCard>
+      </Card>
 
       <!-- 实时排名 -->
-      <PageCard title="访问来源排名">
+      <Card title="访问来源排名">
         <div class="space-y-3">
           <div
             v-for="item in rankList"
@@ -296,12 +314,12 @@ const activityColorMap: Record<string, string> = {
             <span class="text-sm text-gray-500 w-12 text-right flex-shrink-0">{{ item.value.toLocaleString() }}</span>
           </div>
         </div>
-      </PageCard>
+      </Card>
 
       <!-- 访问来源饼图 -->
-      <PageCard title="流量分布">
+      <Card title="流量分布">
         <div ref="pieChartRef" style="width: 100%; height: 260px;"></div>
-      </PageCard>
+      </Card>
     </div>
   </div>
 </template>

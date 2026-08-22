@@ -4,12 +4,8 @@
  */
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Plus, Edit, Trash2 } from '@lucide/vue'
-import DataTable from '@/components/DataTable.vue'
-import PageCard from '@/components/PageCard.vue'
-import SearchInput from '@/components/SearchInput.vue'
-import StatusBadge from '@/components/StatusBadge.vue'
-import type { TableColumn } from '@/types/table'
+import { Plus, Edit, Trash2, Search } from '@lucide/vue'
+import { Card, Input, Table, Tag, Pagination } from '@/components/ui'
 
 // ========== 统计信息 ==========
 const statsCards = [
@@ -57,14 +53,22 @@ const filteredData = computed(() => {
   return list
 })
 
+// ========== 分页 ==========
+const currentPage = ref(1)
+const pageSize = ref(5)
+const pagedData = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return filteredData.value.slice(start, start + pageSize.value)
+})
+
 // ========== 表格列配置 ==========
-const columns: TableColumn[] = [
+const columns = [
   { title: '标题', dataIndex: 'title', width: '25%' },
   { title: '描述', dataIndex: 'description', width: '30%' },
-  { title: '负责人', dataIndex: 'owner', width: '10%', align: 'center' },
-  { title: '开始时间', dataIndex: 'startAt', width: '15%', align: 'center' },
-  { title: '进度', dataIndex: 'progress', width: '12%', align: 'center' },
-  { title: '操作', dataIndex: 'action', width: '8%', align: 'center' },
+  { title: '负责人', dataIndex: 'owner', width: '10%', align: 'center' as const },
+  { title: '开始时间', dataIndex: 'startAt', width: '15%', align: 'center' as const },
+  { title: '进度', dataIndex: 'progress', width: '12%', align: 'center' as const },
+  { title: '操作', dataIndex: 'action', width: '8%', align: 'center' as const },
 ]
 
 // ========== 操作 ==========
@@ -88,7 +92,7 @@ const statusTextMap: Record<string, string> = {
   waiting: '等待中',
   done: '已完成',
 }
-const statusTypeMap: Record<string, 'blue' | 'orange' | 'green'> = {
+const statusColorMap: Record<string, 'blue' | 'orange' | 'green'> = {
   processing: 'blue',
   waiting: 'orange',
   done: 'green',
@@ -103,7 +107,7 @@ const progressBarColor: Record<string, string> = {
 <template>
   <div class="min-h-full bg-gray-50 p-6 space-y-6">
     <!-- ========== 统计卡片 ========== -->
-    <PageCard no-padding body-class="px-6 py-5">
+    <Card :body-style="{ padding: '20px 24px' }">
       <div class="grid grid-cols-1 sm:grid-cols-3">
         <div
           v-for="(stat, i) in statsCards"
@@ -115,28 +119,32 @@ const progressBarColor: Record<string, string> = {
           <p class="text-xl font-semibold text-gray-800">{{ stat.value }}</p>
         </div>
       </div>
-    </PageCard>
+    </Card>
 
     <!-- ========== 标准列表 ========== -->
-    <PageCard title="标准列表" no-padding body-class="p-0">
+    <Card title="标准列表" :body-style="{ padding: '0' }">
       <!-- 标题栏右侧：筛选 + 搜索 -->
       <template #extra>
-        <div class="flex items-center border border-gray-200 rounded-md overflow-hidden">
-          <button
-            v-for="opt in [
-              { value: 'all', label: '全部' },
-              { value: 'processing', label: '进行中' },
-              { value: 'waiting', label: '等待中' },
-            ]"
-            :key="opt.value"
-            class="px-3 py-1.5 text-xs transition-colors"
-            :class="statusFilter === opt.value ? 'text-blue-600 bg-blue-50 font-medium' : 'text-gray-500 hover:bg-gray-50'"
-            @click="statusFilter = opt.value as 'all' | 'processing' | 'waiting'"
-          >
-            {{ opt.label }}
-          </button>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center border border-gray-200 rounded-md overflow-hidden">
+            <button
+              v-for="opt in [
+                { value: 'all', label: '全部' },
+                { value: 'processing', label: '进行中' },
+                { value: 'waiting', label: '等待中' },
+              ]"
+              :key="opt.value"
+              class="px-3 py-1.5 text-xs transition-colors"
+              :class="statusFilter === opt.value ? 'text-blue-600 bg-blue-50 font-medium' : 'text-gray-500 hover:bg-gray-50'"
+              @click="statusFilter = opt.value as 'all' | 'processing' | 'waiting'"
+            >
+              {{ opt.label }}
+            </button>
+          </div>
+          <Input v-model="searchText" placeholder="请输入" allow-clear custom-class="w-48">
+            <template #prefix><Search :size="14" /></template>
+          </Input>
         </div>
-        <SearchInput v-model="searchText" placeholder="请输入" />
       </template>
 
       <!-- 新增按钮 -->
@@ -152,23 +160,14 @@ const progressBarColor: Record<string, string> = {
 
       <!-- 通用表格 -->
       <div class="p-6">
-        <DataTable
-          :columns="columns"
-          :data="filteredData"
-          :page-size="5"
-          row-key="id"
-        >
+        <Table :columns="columns" :data="pagedData" row-key="id">
           <!-- 标题列：头像 + 标题 + 状态标签 -->
           <template #cell-title="{ row }">
             <div class="flex items-center gap-3">
               <img :src="row.avatar" class="w-10 h-10 rounded-lg flex-shrink-0" alt="图标" />
               <div>
                 <span class="text-sm font-medium text-gray-800 hover:text-blue-500 cursor-pointer">{{ row.title }}</span>
-                <StatusBadge
-                  :text="statusTextMap[row.status] || ''"
-                  :type="statusTypeMap[row.status] || 'blue'"
-                  class="ml-2"
-                />
+                <Tag :color="statusColorMap[row.status]" size="sm" class="ml-2">{{ statusTextMap[row.status] }}</Tag>
               </div>
             </div>
           </template>
@@ -215,8 +214,17 @@ const progressBarColor: Record<string, string> = {
               </button>
             </div>
           </template>
-        </DataTable>
+        </Table>
       </div>
-    </PageCard>
+
+      <!-- 分页 -->
+      <div class="flex justify-end px-6 pb-6">
+        <Pagination
+          v-model:current="currentPage"
+          :total="filteredData.length"
+          :page-size="pageSize"
+        />
+      </div>
+    </Card>
   </div>
 </template>

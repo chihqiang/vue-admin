@@ -1,6 +1,6 @@
 /**
  * 基础组件统一导出
- * 使用方式：import { Button, Modal, Tabs, Input, Select, message, notification } from '@/components/Base'
+ * 使用方式：import { Button, Modal, Tabs, Input, Select, message, notification } from '@/components/ui'
  */
 
 // 表单类
