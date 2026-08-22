@@ -4,6 +4,11 @@ import type { RouteRecordRaw } from 'vue-router'
 /**
  * 路由配置
  * 约定：所有文案都是中文，不做国际化
+ * 结构：
+ *   /login           → 独立登录页（无 Layout）
+ *   /                → BasicLayout 嵌套布局
+ *     /dashboard/analysis  → 分析页
+ *     (后续新增页面挂到 Layout children 下)
  */
 const routes: RouteRecordRaw[] = [
   {
@@ -13,11 +18,18 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '登录' },
   },
   {
-    // 临时的首页占位路由，用来承接登录成功后的跳转
+    // 所有需要 Layout 的页面都挂在这个路由的 children 下
     path: '/',
-    name: 'Home',
-    component: () => import('@/App.vue'),
-    meta: { title: '首页' },
+    component: () => import('@/layouts/BasicLayout.vue'),
+    redirect: '/dashboard/analysis',
+    children: [
+      {
+        path: '/dashboard/analysis',
+        name: 'DashboardAnalysis',
+        component: () => import('@/views/dashboard/Analysis.vue'),
+        meta: { title: '分析页' },
+      },
+    ],
   },
 ]
 
