@@ -111,7 +111,7 @@ async function handleRegister() {
     })
     // 注册成功后保存 token，自动拉取用户信息并跳转首页
     userStore.setToken(result.token)
-    await userStore.GetInfo()
+    await userStore.fetchUserInfo()
     message.success('注册成功，欢迎加入！')
     await router.push('/')
   } catch (e) {

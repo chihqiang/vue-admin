@@ -57,7 +57,7 @@ function clearErrors() {
 
 /**
  * 提交登录
- * 校验通过后调用 userStore.Login 并拉取用户信息
+ * 校验通过后调用 userStore.login 并拉取用户信息
  * 抛出异常时由父组件捕获并展示错误提示
  */
 async function submitLogin(): Promise<void> {
@@ -65,7 +65,7 @@ async function submitLogin(): Promise<void> {
   // 判断账号是邮箱还是用户名
   const emailRegex = /^([\w-])+@([\w-])+((\.[\w-]{2,3}){1,2})$/
   const isEmail = emailRegex.test(form.username)
-  await userStore.Login(
+  await userStore.login(
     {
       [isEmail ? 'email' : 'username']: form.username,
       password: form.password,
@@ -73,7 +73,7 @@ async function submitLogin(): Promise<void> {
     },
     form.rememberMe,
   )
-  await userStore.GetInfo()
+  await userStore.fetchUserInfo()
 }
 
 // 暴露给父组件

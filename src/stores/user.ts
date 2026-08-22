@@ -1,20 +1,26 @@
 /**
- * 用户状态（Pinia Setup Store 写法）
+ * 用户状态（Pinia Setup Store）
  *
- * 持久化介质：统一走 @/utils/storage（底层 localStorage，SSR 安全），
- * 业务层不再直接访问 localStorage。
+ * 职责：
+ *   - 管理 token 持久化（localStorage + 过期时间）
+ *   - 管理用户信息（name / avatar / username / role / permissions）
+ *   - 管理动态路由加载状态（menus / dynamicRoutesLoaded）
+ *   - 登录 / 登出 / 清理状态
  *
- * 提供：
- *   - Login：调用接口登录，保存 token 到 storage + store
- *   - GetInfo：根据 token 拉取用户信息、角色、权限列表（无条件发起请求）
- *   - refreshUserInfo：已拉取过则跳过，否则调用 GetInfo（路由守卫用，避免每次路由切换都请求）
- *   - Logout：调用登出接口，清 token、清用户信息
- *   - isLogin：是否已登录（token 存在且未过期）
+ * 设计原则：
+ *   - Store 不直接依赖 vue-router（不注入 addRoute / transform）
+ *   - 路由注册由 router 模块负责（调用 store 数据后自行 addRoute）
+ *   - Store 只提供数据（menus）和状态标记（dynamicRoutesLoaded）
+ *
+ * 持久化介质：统一走 @/utils/storage（底层 localStorage，SSR 安全）
  */
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { getInfo, login as apiLogin, logout as apiLogout } from '@/api/login'
+import { getUserMenus } from '@/api/menu'
 import type { LoginParams, LoginByMobileParams, UserInfo } from '@/api/login'
+import type { AsyncMenuItem } from '@/router/asyncRoutes'
+import { asyncRoutes } from '@/router/routes'
 import { timeFix } from '@/utils/util'
 import { storageGet, storageRemove, storageSet } from '@/utils/storage'
 
@@ -51,6 +57,12 @@ export const useUserStore = defineStore('user', () => {
   /** permissionId 列表，扁平化后方便判断权限 */
   const permissions = ref<string[]>([])
 
+  /** 动态路由菜单（从后端获取） */
+  const menus = ref<AsyncMenuItem[]>([])
+
+  /** 是否已加载过动态路由 */
+  const dynamicRoutesLoaded = ref<boolean>(false)
+
   // ============ Getters ============
 
   /** 是否已登录（有 token 且未过期） */
@@ -81,14 +93,6 @@ export const useUserStore = defineStore('user', () => {
     storageRemove(TOKEN_EXPIRE_KEY)
   }
 
-  /**
-   * 外部直接设置 token（注册成功后使用）
-   * 默认使用 7 天过期
-   */
-  function setToken(newToken: string): void {
-    writeToken(newToken, 7 * 24 * 60 * 60 * 1000)
-  }
-
   // ============ Actions ============
 
   /**
@@ -96,10 +100,7 @@ export const useUserStore = defineStore('user', () => {
    * @param params 账号密码 或 手机号验证码
    * @param rememberMe 是否记住我（false 时过期时间=24 小时，true 时=7 天）
    */
-  async function Login(
-    params: LoginParams | LoginByMobileParams,
-    rememberMe = false,
-  ) {
+  async function login(params: LoginParams | LoginByMobileParams, rememberMe = false) {
     const result = await apiLogin(params)
     // 保存 token 与过期时间
     token.value = result.token
@@ -112,7 +113,7 @@ export const useUserStore = defineStore('user', () => {
    * 拉取当前登录用户的基本信息 + 角色 + 权限
    * 一般在进入主路由 / 刷新页面时调用（无条件拉取）。
    */
-  async function GetInfo() {
+  async function fetchUserInfo() {
     const result = await getInfo()
     info.value = result
     name.value = result.name
@@ -124,19 +125,60 @@ export const useUserStore = defineStore('user', () => {
   }
 
   /**
-   * 懒加载用户信息：已拉取则直接返回，否则调用 GetInfo。
+   * 获取动态路由菜单数据
+   * - 优先从后端 /user/menus 获取
+   * - 失败时降级到本地 routes.ts 兜底数据
+   *
+   * Store 只负责获取和存储菜单数据，不负责路由注册。
+   * 路由注册由 router 守卫调用此方法后自行处理。
+   */
+  async function fetchMenus(): Promise<AsyncMenuItem[]> {
+    if (dynamicRoutesLoaded.value && menus.value.length > 0) {
+      return menus.value
+    }
+
+    try {
+      const menuList = await getUserMenus()
+      console.log('[userStore] getUserMenus 返回:', menuList)
+      // 防御性检查：确保返回的是数组
+      if (Array.isArray(menuList) && menuList.length > 0) {
+        menus.value = menuList
+      } else {
+        console.warn('[userStore] getUserMenus 返回数据非数组或为空，降级到本地路由:', menuList)
+        menus.value = asyncRoutes
+      }
+    } catch (err) {
+      console.warn('[userStore] getUserMenus 失败，降级到本地路由:', err)
+      menus.value = asyncRoutes
+    }
+
+    dynamicRoutesLoaded.value = true
+    return menus.value
+  }
+
+  /**
+   * 懒加载用户信息：已拉取则直接返回，否则调用 fetchUserInfo。
    * 路由守卫每次切换路由都会调用这个方法，避免同一用户重复请求。
    */
   async function refreshUserInfo(force = false): Promise<UserInfo> {
     if (!force && info.value) return info.value
-    return GetInfo()
+    return fetchUserInfo()
+  }
+
+  /**
+   * 外部直接设置 token（注册成功后使用）
+   * 默认使用 7 天过期
+   */
+  function setToken(newToken: string): void {
+    token.value = newToken
+    writeToken(newToken, TOKEN_EXPIRE_MS)
   }
 
   /**
    * 登出：通知后端 + 清理本地
    * 无论后端成功与否，最终都会清掉本地登录态。
    */
-  async function Logout() {
+  async function logout() {
     try {
       await apiLogout()
     } finally {
@@ -153,7 +195,13 @@ export const useUserStore = defineStore('user', () => {
     username.value = ''
     info.value = null
     permissions.value = []
+    menus.value = []
+    dynamicRoutesLoaded.value = false
     clearToken()
+    // 清理标签页（延迟 import 避免循环依赖）
+    import('@/stores/tabs').then(({ useTabsStore }) => {
+      useTabsStore().reset()
+    })
   }
 
   return {
@@ -165,15 +213,18 @@ export const useUserStore = defineStore('user', () => {
     username,
     info,
     permissions,
+    menus,
+    dynamicRoutesLoaded,
     // getters
     isLogin,
     roleId,
     // actions
-    Login,
-    GetInfo,
+    login,
+    fetchUserInfo,
+    fetchMenus,
     refreshUserInfo,
     setToken,
-    Logout,
+    logout,
     clearState,
   }
 })

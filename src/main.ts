@@ -7,6 +7,7 @@ import './assets/main.css'
 
 import { setToastHandler, type ToastHandler } from '@/utils/request'
 import { alert, message } from '@/components'
+import { permissionDirective } from '@/directives/permission'
 
 // ========================================================================
 // 启动流程：Mock 注册 → 创建 Vue 应用 → 注册 Pinia/Router → 注入 Toast Handler → mount
@@ -25,9 +26,10 @@ import { alert, message } from '@/components'
 async function bootstrap() {
   const useMockEnv = String(import.meta.env.VITE_USE_MOCK ?? 'true') === 'true'
   if (import.meta.env.DEV && useMockEnv) {
-    // Mock 入口内部本身还有一层 if (import.meta.env.DEV)，这里做双重保险，
-    // 保证 Rollup 能按条件静态分析并 tree-shake 掉 mock 模块。
-    await import('./mock')
+    // 等待所有 mock 规则注册完成后再继续，
+    // 确保路由守卫首次触发请求时 mock 已就绪。
+    const { setupMock } = await import('../mock')
+    await setupMock()
   }
 
   const app = createApp(App)
@@ -35,6 +37,9 @@ async function bootstrap() {
 
   app.use(pinia)
   app.use(router)
+
+  // 注册全局自定义指令
+  app.directive('permission', permissionDirective)
 
   // 把 feedback 组件注入 request.ts（解除循环依赖风险）。
   // 注入时机：Pinia/Router 已注册，request 内部的 useUserStore()/router 都能正常取。

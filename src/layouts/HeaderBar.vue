@@ -12,13 +12,18 @@ import {
   Settings,
   LogOut,
   ChevronDown,
+  Sun,
+  Moon,
 } from '@lucide/vue'
 import { useUserStore } from '@/stores/user'
+import { useAppStore } from '@/stores/app'
+import { resetRouter } from '@/router'
 import { useClickOutside } from '@/hooks/useClickOutside'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const appStore = useAppStore()
 
 // ========== 折叠侧边栏 ==========
 withDefaults(
@@ -80,23 +85,34 @@ function goSettings() {
 /** 退出登录 */
 async function handleLogout() {
   userMenuOpen.value = false
-  await userStore.Logout()
+  await userStore.logout()
+  resetRouter()
   router.push('/login')
 }
 </script>
 
 <template>
   <header
-    class="flex items-center justify-between h-14 px-4 bg-white border-b border-gray-100 shadow-sm"
+    class="flex items-center justify-between h-14 px-4 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 shadow-sm"
   >
     <!-- 左侧：折叠按钮 + 面包屑 -->
     <div class="flex items-center gap-3">
       <!-- 折叠按钮 -->
       <button
-        class="p-1.5 rounded hover:bg-gray-100 text-gray-600 transition-colors"
+        class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
         @click="toggleCollapse"
       >
         <MenuIcon :size="20" />
+      </button>
+
+      <!-- 主题切换按钮 -->
+      <button
+        class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
+        :title="appStore.isDark ? '切换到浅色' : '切换到深色'"
+        @click="appStore.toggleTheme()"
+      >
+        <Sun v-if="appStore.isDark" :size="18" />
+        <Moon v-else :size="18" />
       </button>
 
       <!-- 面包屑 -->
@@ -106,12 +122,11 @@ async function handleLogout() {
           <ChevronRight
             v-if="index > 0"
             :size="14"
-            class="mx-1 text-gray-300"
+            class="mx-1 text-gray-300 dark:text-gray-600"
           />
           <!-- 当前页（最后一级）不可点 -->
-          <span
-            v-if="index === breadcrumbs.length - 1"
-            class="text-gray-700 font-medium"
+                    <span v-if="index === breadcrumbs.length - 1"
+            class="text-gray-700 dark:text-gray-200 font-medium"
           >
             {{ crumb.title }}
           </span>
@@ -119,11 +134,11 @@ async function handleLogout() {
           <router-link
             v-else-if="crumb.path"
             :to="crumb.path"
-            class="text-gray-500 hover:text-blue-500"
+            class="text-gray-500 dark:text-gray-400 hover:text-blue-500"
           >
             {{ crumb.title }}
           </router-link>
-          <span v-else class="text-gray-500">{{ crumb.title }}</span>
+          <span v-else class="text-gray-500 dark:text-gray-400">{{ crumb.title }}</span>
         </template>
       </nav>
     </div>
@@ -131,7 +146,7 @@ async function handleLogout() {
     <!-- 右侧：用户菜单 -->
     <div ref="userMenuRef" class="relative">
       <button
-        class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+        class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
         @click.stop="toggleUserMenu"
       >
         <!-- 头像 -->
@@ -148,7 +163,7 @@ async function handleLogout() {
           <UserIcon :size="16" />
         </div>
         <!-- 用户名 -->
-        <span class="text-sm text-gray-700">{{ userStore.name || '用户' }}</span>
+        <span class="text-sm text-gray-700 dark:text-gray-200">{{ userStore.name || '用户' }}</span>
         <ChevronDown :size="14" class="text-gray-400" />
       </button>
 
@@ -163,25 +178,25 @@ async function handleLogout() {
       >
         <div
           v-if="userMenuOpen"
-          class="absolute right-0 top-full mt-1 w-44 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50"
+          class="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 py-1 z-50"
         >
           <button
-            class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+            class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
             @click="goProfile"
           >
             <UserIcon :size="14" />
             个人中心
           </button>
           <button
-            class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+            class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
             @click="goSettings"
           >
             <Settings :size="14" />
             账户设置
           </button>
-          <div class="border-t border-gray-100 my-1" />
+          <div class="border-t border-gray-100 dark:border-gray-700 my-1" />
           <button
-            class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-red-50"
+            class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
             @click="handleLogout"
           >
             <LogOut :size="14" />

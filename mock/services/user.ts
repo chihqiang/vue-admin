@@ -110,12 +110,14 @@ function buildSuperRole(): UserRole {
 }
 
 const info = (options: { url?: string; headers?: Record<string, string> }) => {
-  // 根据 request 拦截器注入的 token 判断身份
-  const token =
-    (options.headers && options.headers['Access-Token']) ||
-    (options.headers && options.headers['access-token']) ||
+  // 根据 request 拦截器注入的 Authorization token 判断身份
+  const authHeader =
+    (options.headers && options.headers['Authorization']) ||
+    (options.headers && options.headers['authorization']) ||
     ''
-  const isSuper = typeof token === 'string' && token.includes('super')
+  // Authorization: Bearer mock-token-admin-xxx
+  const token = authHeader.replace(/^Bearer\s+/i, '')
+  const isSuper = token.includes('super')
   const role = isSuper ? buildSuperRole() : buildAdminRole()
   const who: 'admin' | 'super' = isSuper ? 'super' : 'admin'
 

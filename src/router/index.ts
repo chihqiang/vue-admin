@@ -1,9 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { useTabsStore } from '@/stores/tabs'
 import { useNprogress } from '@/hooks/useNprogress'
 import { checkRoutePermission } from '@/utils/permission'
 import { alert } from '@/components'
+import { transformAsyncRoutes } from './asyncRoutes'
 
 const { start: startProgress, done: doneProgress } = useNprogress()
 
@@ -28,24 +30,24 @@ declare module 'vue-router' {
      * 多个用英文逗号分隔表示"任一即可"（逻辑或）
      */
     permission?: string
+    /** 是否缓存该页面组件（配合 KeepAlive） */
+    keepAlive?: boolean
+    /** 标签页是否固定不可关闭（如首页） */
+    affix?: boolean
   }
 }
 
 /**
- * 路由配置（= 菜单配置）
- * 约定：所有文案都是中文，不做国际化
- * 结构：
- *   /login           → 独立登录页（无 Layout，hideInMenu）
- *   /                → BasicLayout 嵌套布局（requiresAuth）
- *     /dashboard/*   → 仪表盘分组
- *     /form/*        → 表单页分组
- *     /list/*        → 列表页分组
- *     /profile/*     → 个人页分组
+ * 静态路由配置
  *
- * 分组节点（如 /dashboard）无 component，只承担菜单层级 + redirect，
- * 访问分组根路径会自动跳到默认子页；侧边栏由此树形结构直接渲染。
+ * 约定：
+ *   /login           → 独立登录页（无 Layout，hideInMenu）
+ *   /register        → 独立注册页
+ *   /                → BasicLayout 嵌套布局（requiresAuth）
+ *     业务子路由通过动态路由 addRoute 注册
+ *   /403 /500 /:404  → 异常页
  */
-const routes: RouteRecordRaw[] = [
+const staticRoutes: RouteRecordRaw[] = [
   {
     path: '/login',
     name: 'Login',
@@ -60,111 +62,28 @@ const routes: RouteRecordRaw[] = [
   },
   {
     // 所有需要 Layout 的页面都挂在这个路由的 children 下
+    // 动态路由注册时，业务路由会作为此路由的 children 添加
     path: '/',
+    name: 'Layout',
     component: () => import('@/layouts/BasicLayout.vue'),
     redirect: '/dashboard/analysis',
-    // 父级声明 requiresAuth，子路由默认继承鉴权要求
     meta: { requiresAuth: true, hideInMenu: true },
-    children: [
-      // ============ 仪表盘 ============
-      {
-        path: '/dashboard',
-        name: 'Dashboard',
-        redirect: '/dashboard/analysis',
-        meta: { title: '仪表盘', icon: 'LayoutDashboard' },
-        children: [
-          {
-            path: '/dashboard/analysis',
-            name: 'DashboardAnalysis',
-            component: () => import('@/views/dashboard/Analysis.vue'),
-            meta: { title: '分析页' },
-          },
-          {
-            path: '/dashboard/workplace',
-            name: 'DashboardWorkplace',
-            component: () => import('@/views/dashboard/Workplace.vue'),
-            meta: { title: '工作台' },
-          },
-          {
-            path: '/dashboard/monitor',
-            name: 'DashboardMonitor',
-            component: () => import('@/views/dashboard/Monitor.vue'),
-            meta: { title: '监控页' },
-          },
-        ],
-      },
-      // ============ 表单页 ============
-      {
-        path: '/form',
-        name: 'Form',
-        redirect: '/form/basic-form',
-        meta: { title: '表单页', icon: 'FileText' },
-        children: [
-          {
-            path: '/form/basic-form',
-            name: 'BasicForm',
-            component: () => import('@/views/form/BasicForm.vue'),
-            meta: { title: '基础表单' },
-          },
-          {
-            path: '/form/step-form',
-            name: 'StepForm',
-            component: () => import('@/views/form/step-form/StepForm.vue'),
-            meta: { title: '分步表单' },
-          },
-          {
-            path: '/form/advanced-form',
-            name: 'AdvancedForm',
-            component: () => import('@/views/form/advanced-form/AdvancedForm.vue'),
-            meta: { title: '高级表单' },
-          },
-        ],
-      },
-      // ============ 列表页 ============
-      {
-        path: '/list',
-        name: 'List',
-        redirect: '/list/basic',
-        meta: { title: '列表页', icon: 'Table' },
-        children: [
-          {
-            path: '/list/basic',
-            name: 'BasicList',
-            component: () => import('@/views/list/BasicList.vue'),
-            meta: { title: '基础列表' },
-          },
-          {
-            path: '/list/search',
-            name: 'SearchList',
-            component: () => import('@/views/list/SearchList.vue'),
-            meta: { title: '搜索列表' },
-          },
-        ],
-      },
-      // ============ 个人页 ============
-      {
-        path: '/profile',
-        name: 'Profile',
-        redirect: '/profile/advanced',
-        meta: { title: '个人页', icon: 'User' },
-        children: [
-          {
-            path: '/profile/advanced',
-            name: 'ProfileAdvanced',
-            component: () => import('@/views/profile/ProfileAdvanced.vue'),
-            meta: { title: '个人中心' },
-          },
-          {
-            path: '/profile/basic',
-            name: 'ProfileBasic',
-            component: () => import('@/views/profile/ProfileBasic.vue'),
-            meta: { title: '基本设置' },
-          },
-        ],
-      },
-    ],
+    // children 由动态路由运行时 addRoute 注册，初始为空
+    children: [],
   },
-  // ============ 404 兜底路由 ============
+  // ============ 异常页 ============
+  {
+    path: '/403',
+    name: 'Forbidden',
+    component: () => import('@/views/exception/Forbidden.vue'),
+    meta: { title: '403', requiresAuth: false, hideInMenu: true, hideInBreadcrumb: true },
+  },
+  {
+    path: '/500',
+    name: 'ServerError',
+    component: () => import('@/views/exception/ServerError.vue'),
+    meta: { title: '500', requiresAuth: false, hideInMenu: true, hideInBreadcrumb: true },
+  },
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
@@ -175,52 +94,85 @@ const routes: RouteRecordRaw[] = [
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes,
+  routes: staticRoutes,
 })
 
 /**
- * 全局前置守卫（按优先级依次检查）：
+ * 全局前置守卫
+ *
+ * 核心流程：
  *   1. 启动 NProgress
- *   2. requiresAuth → 未登录跳 /login（带 redirect）
- *   3. 已登录 & info 未拉取 → refreshUserInfo() 懒加载 /user/info
- *   4. meta.permission → 无权限弹 alert 并回首页
- *   5. 已登录却访问 /login → 直接跳首页
+ *   2. 已登录却访问 /login → 跳首页
+ *   3. 未登录访问需鉴权页面 → 跳 /login（带 redirect）
+ *   4. 已登录 & 用户信息为空 → 懒拉取 /user/info
+ *   5. 已登录 & 动态路由未加载 → 注册业务路由后重新匹配
+ *   6. 路由级权限校验
+ *
+ * 关键设计——"先加载动态路由，再判断 404"：
+ *   刷新页面时（如直接访问 /dashboard/analysis），动态路由还没注册，
+ *   to.matched 会命中静态的 404 兜底路由（requiresAuth=false）。
+ *   如果此时直接放行，就会渲染 404 页面。
+ *   正确做法：已登录用户在动态路由加载完成前，不应信任 to.matched 的结果，
+ *   先完成动态路由注册，再 return { ...to, replace: true } 重新匹配。
  */
 router.beforeEach(async (to) => {
   startProgress()
 
   const userStore = useUserStore()
-  // 父级 meta 会被 vue-router 合并到 matched 链上
-  const requiresAuth = to.matched.some((r) => r.meta.requiresAuth)
   const isLogin = userStore.isLogin
 
-  // ---------- 2. 登录鉴权 ----------
-  if (requiresAuth && !isLogin) {
-    doneProgress() // 被重定向，提前结束进度条
+  // ---------- 2. 已登录还访问登录页 → 跳首页 ----------
+  if (to.path === '/login' && isLogin) {
+    doneProgress()
+    return { path: '/' }
+  }
+
+  // ---------- 3. 未登录访问需鉴权页面 → 跳登录页 ----------
+  // 不依赖 to.matched 的 requiresAuth，因为动态路由未注册时 matched 不完整。
+  // 只排除明确的公开页面（login / register / 403 / 500），其余都需要登录。
+  // 注意：不排除 404 兜底路由，因为动态路由未注册时真实路径（如 /dashboard/analysis）
+  // 也会命中 404，此时未登录用户应跳登录页而非展示 404。
+  const publicPaths = ['/login', '/register', '/403', '/500']
+  const isPublicRoute = publicPaths.includes(to.path)
+  if (!isLogin && !isPublicRoute) {
+    doneProgress()
     return {
       path: '/login',
       query: to.fullPath !== '/' ? { redirect: to.fullPath } : undefined,
     }
   }
 
-  // ---------- 5. 已登录还访问登录页 → 跳首页 ----------
-  if (to.path === '/login' && isLogin) {
-    doneProgress()
-    return { path: '/' }
-  }
-
-  // ---------- 3. 已登录但用户信息为空 → 懒拉取 ----------
-  if (isLogin && requiresAuth && !userStore.info) {
+  // ---------- 4. 已登录但用户信息为空 → 懒拉取 ----------
+  if (isLogin && !userStore.info) {
     try {
       await userStore.refreshUserInfo()
     } catch (err) {
-      // 拉取失败（比如 token 过期但本地还以为有效）→ 交给 request.ts 的 401 处理
       console.warn('[router] refreshUserInfo failed，交给 401 流程处理：', err)
     }
   }
 
-  // ---------- 4. 路由级权限校验 ----------
-  // 从 matched 链中按"最深层且声明了 permission"的那个为准。
+  // ---------- 5. 动态路由加载 ----------
+  // 已登录但动态路由未注册时，先注册路由，再重新匹配导航目标。
+  // 这一步必须在 404 判断之前，否则刷新页面会直接命中 404。
+  if (isLogin && !userStore.dynamicRoutesLoaded) {
+    try {
+      const menus = await userStore.fetchMenus()
+      const routes = transformAsyncRoutes(menus)
+      routes.forEach((route) => {
+        router.addRoute('Layout', route)
+      })
+      // 动态路由注册后，重新匹配当前导航目标。
+      // 用 to.fullPath 确保只带路径和 query，不带旧的 matched 等内部属性。
+      return { path: to.fullPath, replace: true }
+    } catch (err) {
+      console.error('[router] loadDynamicRoutes failed:', err)
+      doneProgress()
+      alert.error({ title: '加载失败', description: '菜单加载失败，请刷新重试' })
+      return { path: '/login' }
+    }
+  }
+
+  // ---------- 6. 路由级权限校验 ----------
   const requiredPermission = [...to.matched].reverse().find((r) => r.meta?.permission)?.meta
     ?.permission
   if (
@@ -245,6 +197,20 @@ router.afterEach((to) => {
   const baseTitle = 'vue-admin'
   const pageTitle = to.meta?.title || ''
   document.title = pageTitle ? `${pageTitle} - ${baseTitle}` : baseTitle
+
+  // 路由切换后自动添加标签页
+  useTabsStore().addTab(to)
 })
+
+/**
+ * 重置路由（退出登录时调用，移除所有动态路由）
+ */
+export function resetRouter() {
+  const newRouter = createRouter({
+    history: createWebHistory(import.meta.env.BASE_URL),
+    routes: staticRoutes,
+  })
+  ;(router as unknown as { matcher: unknown }).matcher = (newRouter as unknown as { matcher: unknown }).matcher
+}
 
 export default router

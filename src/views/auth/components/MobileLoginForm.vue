@@ -63,16 +63,16 @@ function clearErrors() {
 
 /**
  * 提交登录
- * 校验通过后调用 userStore.Login 并拉取用户信息
+ * 校验通过后调用 userStore.login 并拉取用户信息
  * 抛出异常时由父组件捕获并展示错误提示
  */
 async function submitLogin(): Promise<void> {
   if (!validate()) throw new Error('表单验证失败')
-  await userStore.Login({
+  await userStore.login({
     mobile: form.mobile,
     captcha: form.captcha,
   })
-  await userStore.GetInfo()
+  await userStore.fetchUserInfo()
 }
 
 // ========== 获取验证码倒计时 ==========

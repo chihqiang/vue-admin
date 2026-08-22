@@ -1,6 +1,8 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
+  /** 应用标题 */
+  readonly VITE_APP_TITLE?: string
   /** axios 请求前缀（开发时 /api，生产可改为后端域名） */
   readonly VITE_API_BASE_URL?: string
   /** 是否启用 Mock.js 拦截（仅开发环境生效） */

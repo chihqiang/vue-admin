@@ -93,8 +93,8 @@ const typeClass = computed(() => {
   // text
   if (props.type === 'text') {
     return props.danger
-      ? 'text-red-500 hover:bg-red-50'
-      : 'text-gray-700 hover:bg-gray-50'
+      ? 'text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20'
+      : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
   }
   // link
   if (props.type === 'link') {
@@ -108,16 +108,17 @@ const typeClass = computed(() => {
       ? 'bg-red-500 text-white border border-red-500 hover:bg-red-600 active:bg-red-700'
       : 'bg-blue-500 text-white border border-blue-500 hover:bg-blue-600 active:bg-blue-700'
   }
-  // dashed
+    // dashed
   if (props.type === 'dashed') {
     return props.danger
-      ? 'bg-white text-red-500 border border-dashed border-red-300 hover:border-red-500 hover:text-red-600'
-      : 'bg-white text-gray-700 border border-dashed border-gray-300 hover:border-blue-500 hover:text-blue-500'
+      ? 'bg-white dark:bg-gray-800 text-red-500 border border-dashed border-red-300 dark:border-red-700 hover:border-red-500 hover:text-red-600'
+      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-500 hover:text-blue-500'
   }
+
   // default
   return props.danger
-    ? 'bg-white text-red-500 border border-red-300 hover:border-red-500 hover:text-red-600'
-    : 'bg-white text-gray-700 border border-gray-300 hover:border-blue-500 hover:text-blue-500'
+    ? 'bg-white dark:bg-gray-800 text-red-500 border border-red-300 dark:border-red-700 hover:border-red-500 hover:text-red-600'
+    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:border-blue-500 hover:text-blue-500'
 })
 
 /** 点击事件 */

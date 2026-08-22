@@ -1,7 +1,7 @@
 /**
  * HTTP 请求封装（基于 axios）
  *
- * - 统一注入 Token 请求头（从 userStore 取，不直接读 localStorage）
+ * - 统一注入 Authorization 请求头（从 userStore 取 token，不直接读 localStorage）
  * - 统一解包后端 { code, msg, data, request_id? } 结构
  * - code !== 200 按业务异常抛出
  * - 401 自动清理登录态并跳转登录页（携带 redirect 回跳）
@@ -12,7 +12,6 @@
  *   在 main.ts 里注入。
  */
 import axios, { type AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
-import { ACCESS_TOKEN } from '@/stores/user'
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
 
@@ -177,6 +176,10 @@ function errorHandler(error: AxiosError<ApiResponse>): Promise<never> {
     } else if (status === 401) {
       const msg = data?.msg || '登录状态已过期，请重新登录'
       handleUnauthorized(msg)
+    } else if (status === 500) {
+      const msg = data?.msg || '服务器内部错误，请稍后重试'
+      console.error('[500]', msg)
+      doAlertError({ title: '服务器错误', description: msg })
     } else {
       // 其他 HTTP 错误统一提示
       const msg = data?.msg || `请求失败（${status}）`
@@ -200,8 +203,8 @@ request.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = useUserStore().token
     if (token && config.headers) {
-      // ACCESS_TOKEN 为后端约定的请求头名（'Access-Token'）
-      config.headers[ACCESS_TOKEN] = token
+      // 使用标准 Authorization 头，Bearer token 格式
+      config.headers.Authorization = `Bearer ${token}`
     }
     return config
   },

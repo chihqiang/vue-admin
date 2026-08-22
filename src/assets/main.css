@@ -10,6 +10,12 @@
 @import 'tailwindcss';
 @import 'nprogress/nprogress.css';
 
+/*
+ * TailwindCSS v4 暗色模式：使用 .dark 父选择器（class 策略）
+ * 通过在 <html> 上切换 .dark 类来控制暗色主题
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* 基础重置与全局约定放在 @layer base，确保 Tailwind utility 可正确覆盖 */
 @layer base {
   html,
@@ -37,6 +43,11 @@
     color: rgba(0, 0, 0, 0.85);
   }
 
+  /* 暗色模式全局基础色 */
+  .dark body {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
   /* 自定义滚动条，更贴近企业后台的视觉 */
   ::-webkit-scrollbar {
     width: 8px;
@@ -51,5 +62,11 @@
   }
   ::-webkit-scrollbar-track {
     background: transparent;
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.35);
   }
 }
