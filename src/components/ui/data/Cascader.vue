@@ -31,6 +31,8 @@ interface CascaderOption<T> {
   value: T
   children?: CascaderOption<T>[]
   disabled?: boolean
+  /** 支持自定义字段，配合 fieldNames 动态读取 */
+  [key: string]: unknown
 }
 
 interface FieldNames {
@@ -74,17 +76,17 @@ const emit = defineEmits<{
 }>()
 
 // ========== 字段映射 ==========
-// fieldNames 支持自定义字段名，参数需接受任意结构对象，动态键访问本质需要 any
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getLabel(o: any): string {
+// fieldNames 支持自定义字段名，节点对象可能携带任意字段，故用索引签名定义
+interface FieldItem {
+  [key: string]: unknown
+}
+function getLabel(o: FieldItem): string {
   return o[props.fieldNames.label] as string
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getValue(o: any): T {
+function getValue(o: FieldItem): T {
   return o[props.fieldNames.value] as T
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getChildren(o: any): CascaderOption<T>[] | undefined {
+function getChildren(o: FieldItem): CascaderOption<T>[] | undefined {
   return o[props.fieldNames.children] as CascaderOption<T>[] | undefined
 }
 

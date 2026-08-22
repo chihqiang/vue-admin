@@ -49,6 +49,8 @@ interface TreeNodeRaw {
   disableCheckbox?: boolean
   selectable?: boolean
   isLeaf?: boolean
+  /** 支持自定义字段，配合 fieldNames 动态读取 */
+  [key: string]: unknown
 }
 
 /** 扁平化后的节点 */
@@ -140,18 +142,18 @@ const selectedKeys = shallowRef<Set<T>>(new Set())
 const expandedKeys = shallowRef<Set<T>>(new Set())
 
 // ========== 字段映射辅助 ==========
-// fieldNames 支持自定义字段名，参数需接受任意结构对象，动态键访问本质需要 any
+// fieldNames 支持自定义字段名，节点对象可能携带任意字段，故用索引签名定义
+interface FieldItem {
+  [key: string]: unknown
+}
 /** 读取节点 value（按 fieldNames） */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getValue(node: any): T {
+function getValue(node: FieldItem): T {
   return node[props.fieldNames.value] as T
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getTitle(node: any): string {
+function getTitle(node: FieldItem): string {
   return node[props.fieldNames.title] as string
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getChildren(node: any): TreeNodeRaw[] | undefined {
+function getChildren(node: FieldItem): TreeNodeRaw[] | undefined {
   return node[props.fieldNames.children] as TreeNodeRaw[] | undefined
 }
 

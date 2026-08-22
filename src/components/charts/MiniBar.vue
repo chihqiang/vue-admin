@@ -7,7 +7,7 @@
 import { computed } from 'vue'
 import VChart from 'vue-echarts'
 import '@/components/charts/echarts'
-import type { EChartsOption } from 'echarts'
+import type { EChartsOption, TooltipComponentFormatterCallbackParams } from 'echarts'
 
 interface DataItem {
   x: string
@@ -41,8 +41,10 @@ const option = computed<EChartsOption>(() => ({
   yAxis: { type: 'value', show: false },
   tooltip: {
     trigger: 'axis',
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    formatter: (params: any) => params[0]?.value ?? '',
+    formatter: (params: TooltipComponentFormatterCallbackParams) => {
+      const v = Array.isArray(params) ? params[0]?.value : params.value
+      return String(v ?? '')
+    },
     axisPointer: { type: 'none' },
   },
   series: [
