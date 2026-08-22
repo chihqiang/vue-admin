@@ -6,8 +6,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ShieldCheck } from '@lucide/vue'
-import SideMenu from '@/components/layout/SideMenu.vue'
-import HeaderBar from '@/components/layout/HeaderBar.vue'
+import SideMenu from '@/layouts/SideMenu.vue'
+import HeaderBar from '@/layouts/HeaderBar.vue'
 
 /** 侧边栏是否折叠 */
 const collapsed = ref(false)
