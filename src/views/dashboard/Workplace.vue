@@ -18,7 +18,7 @@ import type {
   WorkplaceActivity,
   TeamMember,
   RadarItem,
-} from '@/types/workplace'
+} from '@/api/workplace'
 
 const userStore = useUserStore()
 

@@ -5,7 +5,7 @@
  */
 import Mock from 'mockjs'
 import { builder } from '../util'
-import type { Permission, UserInfo, UserRole } from '@/types/user'
+import type { Permission, UserInfo, UserRole } from '@/api/login'
 
 /**
  * 生成管理员角色权限（permissionId 与后续菜单一一对应，方便前端做菜单鉴权）

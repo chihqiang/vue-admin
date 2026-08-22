@@ -1,6 +1,6 @@
 import type { AppContext } from 'vue'
-import Container from './Container.vue'
-import { createFeedbackManager } from '@/components/feedback/createManager'
+import MessageBox from './MessageBox.vue'
+import { createManager } from '@/components/feedback/manager'
 
 /** 消息类型 */
 export type MessageType = 'success' | 'info' | 'warning' | 'error' | 'loading'
@@ -29,8 +29,8 @@ interface MessageItem extends MessageConfig {
   key: string | number
 }
 
-const manager = createFeedbackManager<MessageItem>({
-  container: Container,
+const manager = createManager<MessageItem>({
+  container: MessageBox,
   containerClass: 'message-container',
   idPrefix: 'message',
   defaultDuration: 3,

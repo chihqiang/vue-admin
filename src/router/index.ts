@@ -1,6 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { useNprogress } from '@/hooks/useNprogress'
+
+const { start: startProgress, done: doneProgress } = useNprogress()
 
 /**
  * 路由 & 菜单元信息类型扩展
@@ -167,6 +170,8 @@ const router = createRouter({
  * 不在路由层直接读写 localStorage，token 由 store 统一管理
  */
 router.beforeEach((to) => {
+  // 路由切换时启动顶部进度条
+  startProgress()
   // 父级 meta 会被 vue-router 合并到 matched 链上
   const requiresAuth = to.matched.some((r) => r.meta.requiresAuth)
   const isLogin = useUserStore().isLogin
@@ -186,8 +191,9 @@ router.beforeEach((to) => {
   return true
 })
 
-// 全局后置守卫：统一设置页面标题（无需 i18n，全中文）
+// 全局后置守卫：完成进度条 + 统一设置页面标题（无需 i18n，全中文）
 router.afterEach((to) => {
+  doneProgress()
   const baseTitle = 'vue-admin'
   const pageTitle = to.meta?.title || ''
   document.title = pageTitle ? `${pageTitle} - ${baseTitle}` : baseTitle

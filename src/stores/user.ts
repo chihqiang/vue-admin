@@ -9,7 +9,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { getInfo, login as apiLogin, logout as apiLogout } from '@/api/login'
-import type { LoginParams, LoginByMobileParams, UserInfo } from '@/types/user'
+import type { LoginParams, LoginByMobileParams, UserInfo } from '@/api/login'
 import { timeFix } from '@/utils/util'
 
 /** 本地存储里 Token 的 key */

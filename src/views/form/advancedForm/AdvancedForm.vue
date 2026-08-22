@@ -7,7 +7,7 @@
 import { ref, reactive, computed } from 'vue'
 import { Plus, AlertCircle } from '@lucide/vue'
 import { Card, Table, Input, Button, message } from '@/components'
-import type { TableColumn } from '@/types/table'
+import type { TableColumn } from '@/components'
 import RepositoryForm from './RepositoryForm.vue'
 import TaskForm from './TaskForm.vue'
 

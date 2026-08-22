@@ -106,13 +106,8 @@ src/
 │   └── index.ts          # 路由 + 菜单配置（合并，无单独 menu.ts）
 ├── stores/               # Pinia 状态管理
 │   └── user.ts           #   用户状态（token、登录态、用户信息）
-├── types/                # 类型定义
-│   ├── api.ts            #   API 响应格式
-│   ├── table.ts          #   表格列类型
-│   ├── user.ts           #   用户类型
-│   └── workplace.ts      #   工作台类型
 ├── utils/
-│   ├── request.ts        # axios 封装（拦截器、错误处理）
+│   ├── request.ts        # axios 封装（拦截器、错误处理、ApiResponse 类型）
 │   └── util.ts           # 通用工具函数
 ├── views/                # 页面
 │   ├── auth/             #   登录

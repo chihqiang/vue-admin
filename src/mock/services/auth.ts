@@ -11,7 +11,7 @@
  */
 import Mock from 'mockjs'
 import { builder, failBuilder, getBody } from '../util'
-import type { LoginParams, LoginByMobileParams } from '@/types/user'
+import type { LoginParams, LoginByMobileParams } from '@/api/login'
 
 // 账号 → 明文密码映射
 const VALID_CREDENTIALS: Record<string, string> = {

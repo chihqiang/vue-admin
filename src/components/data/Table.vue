@@ -22,7 +22,7 @@
  */
 import { ref, computed, useSlots } from 'vue'
 import { ChevronUp, ChevronDown, ChevronsUpDown } from '@lucide/vue'
-import type { TableColumn } from '@/types/table'
+import type { TableColumn } from './types'
 
 export type { TableColumn }
 

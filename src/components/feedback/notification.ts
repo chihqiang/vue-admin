@@ -1,6 +1,6 @@
 import type { AppContext, Component } from 'vue'
-import Container from './Container.vue'
-import { createFeedbackManager } from '@/components/feedback/createManager'
+import NotifyBox from './NotifyBox.vue'
+import { createManager } from '@/components/feedback/manager'
 
 /** 通知类型 */
 export type NotificationType = 'success' | 'info' | 'warning' | 'error'
@@ -42,8 +42,8 @@ interface NotificationItem extends NotificationConfig {
   key: string | number
 }
 
-const manager = createFeedbackManager<NotificationItem>({
-  container: Container,
+const manager = createManager<NotificationItem>({
+  container: NotifyBox,
   containerClass: 'notification-container',
   idPrefix: 'notification',
   defaultDuration: 4.5,

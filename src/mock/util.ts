@@ -3,7 +3,7 @@
  * 提供统一的响应体 builder、body/query 解析等
  */
 import Mock from 'mockjs'
-import type { ApiResponse } from '@/types/api'
+import type { ApiResponse } from '@/utils/request'
 
 /**
  * 构造统一的响应体

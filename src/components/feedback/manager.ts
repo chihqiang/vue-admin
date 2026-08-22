@@ -29,8 +29,8 @@ export interface FeedbackInstance {
   close: () => void
 }
 
-/** createFeedbackManager 选项 */
-export interface FeedbackManagerOptions<Item extends BaseItem> {
+/** createManager 选项 */
+export interface ManagerOptions<Item extends BaseItem> {
   /** 容器组件 */
   container: Component
   /** 全局容器 className */
@@ -51,7 +51,7 @@ export interface FeedbackManagerOptions<Item extends BaseItem> {
   closeOnContainerClose?: boolean
 }
 
-export interface FeedbackManager<Item extends BaseItem> {
+export interface Manager<Item extends BaseItem> {
   /** 打开一条（已注入 key），返回可关闭句柄 */
   open: (item: Omit<Item, 'key'> & { key?: string | number }, duration?: number) => FeedbackInstance
   /** 按 key 移除一条 */
@@ -67,16 +67,16 @@ export interface FeedbackManager<Item extends BaseItem> {
 /**
  * 创建一个反馈容器管理器
  * @example
- * const manager = createFeedbackManager<MessageItem>({
+ * const manager = createManager<MessageItem>({
  *   container: Container,
  *   containerClass: 'message-container',
  *   idPrefix: 'message',
  *   defaultDuration: 3,
  * })
  */
-export function createFeedbackManager<Item extends BaseItem>(
-  options: FeedbackManagerOptions<Item>,
-): FeedbackManager<Item> {
+export function createManager<Item extends BaseItem>(
+  options: ManagerOptions<Item>,
+): Manager<Item> {
   const { container, containerClass, idPrefix, defaultDuration, defaultItem, closeOnContainerClose = false } = options
 
   let containerEl: HTMLDivElement | null = null
