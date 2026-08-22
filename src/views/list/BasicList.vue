@@ -1,10 +1,12 @@
 /**
  * 基础列表页 /list/basic
- * 顶部统计卡片 + 状态筛选 + 搜索 + 标准列表（头像/标题/描述/负责人/时间/进度条）+ 分页
+ * 顶部统计卡片 + 状态筛选 + 搜索 + 通用表格 + 分页
  */
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Plus, Search, MoreVertical, Edit, Trash2 } from '@lucide/vue'
+import { Plus, Search, Edit, Trash2 } from '@lucide/vue'
+import DataTable from '@/components/DataTable.vue'
+import type { TableColumn } from '@/types/table'
 
 // ========== 统计信息 ==========
 const statsCards = [
@@ -25,9 +27,7 @@ interface ListItem {
   description: string
   owner: string
   startAt: string
-  /** 进度 0-100 */
   progress: number
-  /** 状态 */
   status: 'processing' | 'waiting' | 'done'
 }
 
@@ -46,31 +46,33 @@ const allData = ref<ListItem[]>([
 const filteredData = computed(() => {
   let list = allData.value
   if (statusFilter.value !== 'all') list = list.filter((d) => d.status === statusFilter.value)
-  if (searchText.value) list = list.filter((d) => d.title.toLowerCase().includes(searchText.value.toLowerCase()) || d.owner.includes(searchText.value))
+  if (searchText.value) {
+    list = list.filter(
+      (d) => d.title.toLowerCase().includes(searchText.value.toLowerCase()) || d.owner.includes(searchText.value),
+    )
+  }
   return list
 })
 
-// ========== 分页 ==========
-const currentPage = ref(1)
-const pageSize = ref(5)
-const totalPages = computed(() => Math.ceil(filteredData.value.length / pageSize.value))
-const pagedData = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value
-  return filteredData.value.slice(start, start + pageSize.value)
-})
+// ========== 表格列配置 ==========
+const columns: TableColumn[] = [
+  { title: '标题', dataIndex: 'title', width: '25%' },
+  { title: '描述', dataIndex: 'description', width: '30%' },
+  { title: '负责人', dataIndex: 'owner', width: '10%', align: 'center' },
+  { title: '开始时间', dataIndex: 'startAt', width: '15%', align: 'center' },
+  { title: '进度', dataIndex: 'progress', width: '12%', align: 'center' },
+  { title: '操作', dataIndex: 'action', width: '8%', align: 'center' },
+]
 
 // ========== 操作 ==========
-/** 新增（模拟） */
 function handleAdd() {
   window.alert('打开新增弹窗')
 }
 
-/** 编辑 */
 function handleEdit(item: ListItem) {
   window.alert(`编辑：${item.title}`)
 }
 
-/** 删除 */
 function handleDelete(item: ListItem) {
   if (confirm(`确认删除「${item.title}」？`)) {
     allData.value = allData.value.filter((d) => d.id !== item.id)
@@ -99,11 +101,11 @@ const progressBarColor: Record<string, string> = {
   <div class="min-h-full bg-gray-50 p-6 space-y-6">
     <!-- ========== 统计卡片 ========== -->
     <div class="bg-white rounded-lg border border-gray-100 px-6 py-5">
-      <div class="grid grid-cols-1 sm:grid-cols-3 divide-x divide-gray-100">
+      <div class="grid grid-cols-1 sm:grid-cols-3">
         <div
           v-for="(stat, i) in statsCards"
           :key="i"
-          class="px-6 first:pl-0"
+          class="px-6"
           :class="{ 'border-l border-gray-100': i > 0 }"
         >
           <p class="text-sm text-gray-400 mb-1">{{ stat.label }}</p>
@@ -158,102 +160,73 @@ const progressBarColor: Record<string, string> = {
         </button>
       </div>
 
-      <!-- 列表 -->
+      <!-- 通用表格 -->
       <div class="px-6 py-4">
-        <div
-          v-for="item in pagedData"
-          :key="item.id"
-          class="flex items-start gap-4 py-4 border-b border-gray-50 last:border-0"
+        <DataTable
+          :columns="columns"
+          :data="filteredData"
+          :page-size="5"
+          row-key="id"
         >
-          <!-- 头像 -->
-          <img
-            :src="item.avatar"
-            class="w-12 h-12 rounded-lg flex-shrink-0"
-            alt="图标"
-          />
-          <!-- 主内容 -->
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2 mb-1">
-              <span class="text-sm font-medium text-gray-800 hover:text-blue-500 cursor-pointer">{{ item.title }}</span>
-              <span
-                class="px-2 py-0.5 text-xs rounded"
-                :class="statusColorMap[item.status]"
-              >
-                {{ statusTextMap[item.status] }}
-              </span>
+          <!-- 标题列：头像 + 标题 + 状态标签 -->
+          <template #cell-title="{ row }">
+            <div class="flex items-center gap-3">
+              <img :src="row.avatar" class="w-10 h-10 rounded-lg flex-shrink-0" alt="图标" />
+              <div>
+                <span class="text-sm font-medium text-gray-800 hover:text-blue-500 cursor-pointer">{{ row.title }}</span>
+                <span
+                  class="ml-2 px-2 py-0.5 text-xs rounded"
+                  :class="statusColorMap[row.status]"
+                >
+                  {{ statusTextMap[row.status] }}
+                </span>
+              </div>
             </div>
-            <p class="text-sm text-gray-400">{{ item.description }}</p>
-          </div>
-          <!-- 右侧信息 -->
-          <div class="flex items-center gap-8 flex-shrink-0">
-            <!-- 负责人 -->
-            <div class="text-center">
-              <p class="text-xs text-gray-400 mb-1">负责人</p>
-              <p class="text-sm text-gray-600">{{ item.owner }}</p>
-            </div>
-            <!-- 开始时间 -->
-            <div class="text-center">
-              <p class="text-xs text-gray-400 mb-1">开始时间</p>
-              <p class="text-sm text-gray-600">{{ item.startAt }}</p>
-            </div>
-            <!-- 进度 -->
-            <div class="w-40">
+          </template>
+
+          <!-- 描述列 -->
+          <template #cell-description="{ row }">
+            <span class="text-sm text-gray-400">{{ row.description }}</span>
+          </template>
+
+          <!-- 负责人列 -->
+          <template #cell-owner="{ row }">
+            <span class="text-sm text-gray-600">{{ row.owner }}</span>
+          </template>
+
+          <!-- 开始时间列 -->
+          <template #cell-startAt="{ row }">
+            <span class="text-sm text-gray-600">{{ row.startAt }}</span>
+          </template>
+
+          <!-- 进度列 -->
+          <template #cell-progress="{ row }">
+            <div class="w-full">
               <div class="flex items-center justify-between mb-1">
-                <p class="text-xs text-gray-400">进度</p>
-                <p class="text-xs text-gray-500">{{ item.progress }}%</p>
+                <span class="text-xs text-gray-500">{{ row.progress }}%</span>
               </div>
               <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div
                   class="h-full rounded-full transition-all"
-                  :class="progressBarColor[item.status]"
-                  :style="{ width: item.progress + '%' }"
+                  :class="progressBarColor[row.status]"
+                  :style="{ width: row.progress + '%' }"
                 ></div>
               </div>
             </div>
-          </div>
-          <!-- 操作 -->
-          <div class="flex items-center gap-2 flex-shrink-0">
-            <button
-              class="text-sm text-blue-500 hover:text-blue-600"
-              @click="handleEdit(item)"
-            >
-              <Edit :size="16" />
-            </button>
-            <button
-              class="text-sm text-red-500 hover:text-red-600"
-              @click="handleDelete(item)"
-            >
-              <Trash2 :size="16" />
-            </button>
-          </div>
-        </div>
+          </template>
 
-        <!-- 空状态 -->
-        <div v-if="pagedData.length === 0" class="text-center py-12 text-gray-400 text-sm">
-          暂无数据
-        </div>
-      </div>
-
-      <!-- 分页 -->
-      <div class="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-        <span class="text-xs text-gray-400">共 {{ filteredData.length }} 条</span>
-        <div class="flex items-center gap-2">
-          <button
-            class="px-3 py-1 text-sm border border-gray-200 rounded text-gray-600 hover:text-blue-500 hover:border-blue-400 disabled:opacity-40 disabled:cursor-not-allowed"
-            :disabled="currentPage === 1"
-            @click="currentPage--"
-          >
-            上一页
-          </button>
-          <span class="text-sm text-gray-500">{{ currentPage }} / {{ totalPages }}</span>
-          <button
-            class="px-3 py-1 text-sm border border-gray-200 rounded text-gray-600 hover:text-blue-500 hover:border-blue-400 disabled:opacity-40 disabled:cursor-not-allowed"
-            :disabled="currentPage >= totalPages"
-            @click="currentPage++"
-          >
-            下一页
-          </button>
-        </div>
+          <!-- 操作列 -->
+          <template #cell-action="{ row }">
+            <div class="flex items-center justify-center gap-2">
+              <button class="text-blue-500 hover:text-blue-600" @click="handleEdit(row)">
+                <Edit :size="16" />
+              </button>
+              <button class="text-red-500 hover:text-red-600" @click="handleDelete(row)">
+                <Trash2 :size="16" />
+              </button>
+            </div>
+          </template>
+        </DataTable>
       </div>
     </div>
   </div>
