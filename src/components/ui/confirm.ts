@@ -18,9 +18,9 @@
  */
 import { createVNode, render, reactive, h } from 'vue'
 import type { AppContext, Component } from 'vue'
-import { AlertCircle, CheckCircle2, Info, AlertTriangle } from '@lucide/vue'
 import Modal from './Modal.vue'
 import Button from './Button.vue'
+import { feedbackIconMap, feedbackIconColorMap } from './feedback/constants'
 
 /** 确认框类型 */
 export type ConfirmType = 'confirm' | 'info' | 'success' | 'warning' | 'error'
@@ -51,20 +51,20 @@ export interface ConfirmConfig {
   onClose?: () => void
 }
 
-/** 图标映射（confirm 不显示图标，与 antd 行为一致） */
+/** 图标映射：复用反馈组件共享映射，保证跨组件视觉一致 */
 const iconMap: Partial<Record<Exclude<ConfirmType, 'confirm'>, Component>> = {
-  info: Info,
-  success: CheckCircle2,
-  warning: AlertTriangle,
-  error: AlertCircle,
+  info: feedbackIconMap.info,
+  success: feedbackIconMap.success,
+  warning: feedbackIconMap.warning,
+  error: feedbackIconMap.error,
 }
 
-/** 图标颜色映射 */
+/** 图标颜色映射：复用反馈组件共享映射 */
 const iconColorMap: Partial<Record<Exclude<ConfirmType, 'confirm'>, string>> = {
-  info: 'text-blue-500',
-  success: 'text-green-500',
-  warning: 'text-orange-500',
-  error: 'text-red-500',
+  info: feedbackIconColorMap.info,
+  success: feedbackIconColorMap.success,
+  warning: feedbackIconColorMap.warning,
+  error: feedbackIconColorMap.error,
 }
 
 let appContext: AppContext | null = null

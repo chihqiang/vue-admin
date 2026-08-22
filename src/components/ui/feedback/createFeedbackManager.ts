@@ -123,8 +123,12 @@ export function createFeedbackManager<Item extends BaseItem>(
     const merged: Item = { ...(defaultItem as object), ...item, key } as Item
 
     let closeTimer: ReturnType<typeof setTimeout> | undefined
+    // 防止 close 重复触发（closeOnContainerClose 场景下容器点击与 instance.close() 可能叠加）
+    let closed = false
 
     function close() {
+      if (closed) return
+      closed = true
       if (closeTimer) clearTimeout(closeTimer)
       remove(key)
       userOnClose?.()
@@ -155,7 +159,8 @@ export function createFeedbackManager<Item extends BaseItem>(
   }
 
   function list() {
-    return items
+    // 返回副本，避免外部直接修改内部数组
+    return items.slice()
   }
 
   function setAppContext(ctx: AppContext) {
