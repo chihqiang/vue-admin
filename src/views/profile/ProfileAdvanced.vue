@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue'
 import { Plus, Star, ThumbsUp, MessageCircle, Download, Pencil, Share2, Ellipsis } from '@lucide/vue'
-import { Card, Tag, Button, Divider, Input } from '@/components/ui'
+import { Card, Tag, Button, Divider, Input } from '@/components'
 import { useUserStore } from '@/stores/user'
 import { getTeams } from '@/api/workplace'
 import type { TeamMember } from '@/types/workplace'

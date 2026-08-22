@@ -10,7 +10,7 @@ import type { Component } from 'vue'
 import {
   getFeedbackIcon,
   getFeedbackIconColor,
-} from '@/components/ui/feedback/constants'
+} from '@/components/feedback/constants'
 
 type NotificationType = 'success' | 'info' | 'warning' | 'error'
 type Placement = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight'

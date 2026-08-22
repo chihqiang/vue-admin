@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { Plus, ArrowRight } from '@lucide/vue'
-import { Avatar, Statistic, Divider, Card, Spin, Button } from '@/components/ui'
+import { Avatar, Statistic, Divider, Card, Spin, Button } from '@/components'
 import VChart from 'vue-echarts'
 import '@/components/charts/echarts'
 import type { EChartsOption } from 'echarts'

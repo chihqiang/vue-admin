@@ -11,7 +11,7 @@ import { ACCESS_TOKEN } from '@/stores/user'
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
 import type { ApiResponse } from '@/types/api'
-import { alert, message } from '@/components/ui'
+import { alert, message } from '@/components'
 
 // 创建 axios 实例
 const request = axios.create({

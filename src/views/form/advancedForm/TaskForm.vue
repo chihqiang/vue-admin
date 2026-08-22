@@ -5,7 +5,7 @@
  */
 <script setup lang="ts">
 import { reactive } from 'vue'
-import { Input, Select } from '@/components/ui'
+import { Input, Select } from '@/components'
 
 /** 表单数据 */
 const form = reactive({

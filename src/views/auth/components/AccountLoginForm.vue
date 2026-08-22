@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { User, Lock, Eye, EyeOff } from '@lucide/vue'
-import { Input, Checkbox } from '@/components/ui'
+import { Input, Checkbox } from '@/components'
 
 // ========== 表单数据 ==========
 const form = reactive({

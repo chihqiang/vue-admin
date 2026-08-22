@@ -1,6 +1,6 @@
 import type { AppContext } from 'vue'
 import Container from './Container.vue'
-import { createFeedbackManager } from '@/components/ui/feedback/createManager'
+import { createFeedbackManager } from '@/components/feedback/createManager'
 
 /** 消息类型 */
 export type MessageType = 'success' | 'info' | 'warning' | 'error' | 'loading'

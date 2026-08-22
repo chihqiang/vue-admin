@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { reactive, ref, computed, onBeforeUnmount } from 'vue'
 import { Smartphone, Mail } from '@lucide/vue'
-import { Input, Button, message } from '@/components/ui'
+import { Input, Button, message } from '@/components'
 import { getSmsCaptcha } from '@/api/login'
 
 // ========== 表单数据 ==========

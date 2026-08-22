@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Search, Star, ThumbsUp, MessageCircle, Download, Pencil, Share2 } from '@lucide/vue'
-import { Card, Input, Empty, Tag, Tabs } from '@/components/ui'
+import { Card, Input, Empty, Tag, Tabs } from '@/components'
 
 // ========== 搜索 ==========
 const searchText = ref('')

@@ -7,7 +7,7 @@
 import { reactive, ref, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { CheckCircle } from '@lucide/vue'
-import { Card, Steps, Select, Input, Button, Alert, Divider } from '@/components/ui'
+import { Card, Steps, Select, Input, Button, Alert, Divider } from '@/components'
 
 const router = useRouter()
 

@@ -89,15 +89,12 @@ src/
 │   │   ├── MiniProgress.vue
 │   │   ├── MiniSmoothArea.vue
 │   │   └── RankList.vue  #   排行榜
-│   ├── number-info/      # 数字信息组件
-│   ├── trend/            # 趋势组件
-│   └── ui/               # 基础组件库（按类别分组）
-│       ├── form/         #   表单：Button, Input, Select, Checkbox, Radio, Switch, DatePicker, Upload
-│       ├── layout/       #   布局：Divider, Card, Collapse, Steps, Breadcrumb
-│       ├── display/      #   展示：Tag, Avatar, Badge, Empty, Progress, Timeline, Spin, Skeleton, Statistic, Image, QRCode, Watermark
-│       ├── navigation/   #   导航：Tabs, Pagination, Dropdown, Segmented, Carousel
-│       ├── feedback/     #   反馈：Modal, Drawer, Popover, Tooltip, confirm, alert, message, notification
-│       └── data/         #   数据：Table, Tree, TreeSelect, Transfer, Cascader
+│   ├── form/             # 表单组件：Button, Input, Select, Checkbox, Radio, Switch, DatePicker, Upload
+│   ├── layout/           # 布局组件：Divider, Card, Collapse, Steps, Breadcrumb
+│   ├── display/          # 展示组件：Tag, Avatar, Badge, Empty, Progress, Timeline, Spin, Skeleton, Statistic, Image, QRCode, Watermark, Trend
+│   ├── navigation/       # 导航组件：Tabs, Pagination, Dropdown, Segmented, Carousel
+│   ├── feedback/         # 反馈组件：Modal, Drawer, Popover, Tooltip, confirm, alert, message, notification
+│   └── data/             # 数据组件：Table, Tree, TreeSelect, Transfer, Cascader
 ├── layouts/              # 布局组件
 │   ├── BasicLayout.vue   #   主布局（侧边栏 + 顶栏 + 内容区）
 │   ├── HeaderBar.vue     #   顶栏
@@ -184,14 +181,14 @@ interface RouteMeta {
 
 ### 基础组件使用
 
-统一从 `@/components/ui` 导入：
+统一从 `@/components` 导入：
 
 ```ts
-import { Button, Input, Modal, message, confirm } from '@/components/ui'
+import { Button, Input, Modal, message, confirm } from '@/components'
 ```
 
 组件遵循 antd API 风格，支持 slot 扩展，统一 `size`（sm/md/lg）和 `variant`（filled/outline/dot）约定。
 
 ## 许可证
 
-私有项目，未授权不得使用。
+[Apache License 2.0](LICENSE) Copyright 2026 chihqiang

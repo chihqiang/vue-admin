@@ -11,7 +11,7 @@ import {
   feedbackIconColorMap,
   DEFAULT_FEEDBACK_ICON,
   DEFAULT_FEEDBACK_ICON_COLOR,
-} from '@/components/ui/feedback/constants'
+} from '@/components/feedback/constants'
 
 interface MessageItem {
   content: string

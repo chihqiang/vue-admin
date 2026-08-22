@@ -7,7 +7,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import * as echarts from 'echarts/core'
 import '@/components/charts/echarts'
 import { Activity, TrendingUp, DollarSign, Users, Server, AlertTriangle, CheckCircle, ArrowUp, ArrowDown } from '@lucide/vue'
-import { Card, Statistic, Progress } from '@/components/ui'
+import { Card, Statistic, Progress } from '@/components'
 import type { Component } from 'vue'
 
 // ========== 顶部统计卡片 ==========

@@ -3,10 +3,10 @@
  * 参考 ant-design 的 Modal.confirm / Modal.info / Modal.success / Modal.warning / Modal.error
  *
  * 用法：
- *   import { confirm } from '@/components/ui'
+ *   import { confirm } from '@/components'
  *   confirm({ title: '确认删除？', content: '删除后不可恢复', onOk: () => doDelete() })
  *
- *   import { Modal } from '@/components/ui'
+ *   import { Modal } from '@/components'
  *   Modal.info({ title: '提示', content: '已保存' })
  *   Modal.success({ title: '成功', content: '提交成功' })
  *   Modal.warning({ title: '警告', content: '请先选择' })

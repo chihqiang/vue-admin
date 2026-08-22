@@ -11,8 +11,7 @@ import { Info, MoreHorizontal, ArrowUp, ArrowDown } from '@lucide/vue'
 
 // 基础组件
 import ChartCard from '@/components/charts/ChartCard.vue'
-import Trend from '@/components/trend/Trend.vue'
-import { Statistic } from '@/components/ui'
+import { Statistic, Trend } from '@/components'
 import RankList from '@/components/charts/RankList.vue'
 import MiniProgress from '@/components/charts/MiniProgress.vue'
 

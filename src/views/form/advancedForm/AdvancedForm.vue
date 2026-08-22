@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { Plus, AlertCircle } from '@lucide/vue'
-import { Card, Table, Input, Button, message } from '@/components/ui'
+import { Card, Table, Input, Button, message } from '@/components'
 import type { TableColumn } from '@/types/table'
 import RepositoryForm from './RepositoryForm.vue'
 import TaskForm from './TaskForm.vue'

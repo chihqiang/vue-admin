@@ -10,7 +10,7 @@ import {
   getFeedbackIcon,
   getFeedbackIconColor,
   getFeedbackBoxColor,
-} from '@/components/ui/feedback/constants'
+} from '@/components/feedback/constants'
 
 type AlertType = 'success' | 'info' | 'warning' | 'error'
 

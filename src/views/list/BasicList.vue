@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Plus, Edit, Trash2, Search } from '@lucide/vue'
-import { Button, Card, Input, Table, Tag, Pagination, Statistic, Progress, message, confirm } from '@/components/ui'
+import { Button, Card, Input, Table, Tag, Pagination, Statistic, Progress, message, confirm } from '@/components'
 
 // ========== 统计信息 ==========
 const statsCards = [

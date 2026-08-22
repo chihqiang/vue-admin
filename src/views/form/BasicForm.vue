@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { reactive, ref, computed } from 'vue'
 import { Info } from '@lucide/vue'
-import { Card, Input, Radio, Checkbox, Button, message } from '@/components/ui'
+import { Card, Input, Radio, Checkbox, Button, message } from '@/components'
 
 // ========== 表单数据 ==========
 const form = reactive({

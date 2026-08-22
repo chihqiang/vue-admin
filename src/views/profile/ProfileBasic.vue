@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { CloudUpload, Plus } from '@lucide/vue'
-import { Card, Input, Select, Button, Upload, message } from '@/components/ui'
+import { Card, Input, Select, Button, Upload, message } from '@/components'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
