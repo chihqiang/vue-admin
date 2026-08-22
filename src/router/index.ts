@@ -29,6 +29,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/dashboard/Analysis.vue'),
         meta: { title: '分析页' },
       },
+      {
+        path: '/dashboard/workplace',
+        name: 'DashboardWorkplace',
+        component: () => import('@/views/dashboard/Workplace.vue'),
+        meta: { title: '工作台' },
+      },
     ],
   },
 ]

@@ -15,6 +15,7 @@ if (import.meta.env.DEV) {
   // 按顺序引入各业务 mock 模块（每个模块内部会调用 Mock.mock 注册）
   import('./services/auth')
   import('./services/user')
+  import('./services/workplace')
 
   // 全局设置：模拟网络 300~900ms 延迟，更贴近真实环境
   Mock.setup({
