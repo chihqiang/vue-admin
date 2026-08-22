@@ -8,10 +8,12 @@
  * - size: sm / md
  * - direction: horizontal / vertical
  * - status: 当前步骤状态 (wait / process / finish / error)
+ * - 步骤内容：通过具名插槽 `#step-{index}` 渲染对应步骤的内容，仅当前步骤显示
  *
  * 事件：
  * - @change: 点击步骤时 (index)
  */
+import { computed, useSlots } from 'vue'
 import type { Component } from 'vue'
 
 interface StepItem {
@@ -60,13 +62,22 @@ const statusConfig = {
   finish: { dot: 'bg-blue-500', text: 'text-blue-500', border: 'border-blue-500' },
   error: { dot: 'bg-red-500', text: 'text-red-500', border: 'border-red-500' },
 }
+
+const slots = useSlots()
+
+/** 是否传入了任意步骤内容插槽（#step-{index}） */
+const hasStepContent = computed(() =>
+  props.items.some((_, i) => !!slots[`step-${i}`]),
+)
 </script>
 
 <template>
-  <div
-    class="flex"
-    :class="direction === 'horizontal' ? 'flex-row' : 'flex-col'"
-  >
+  <div>
+    <!-- 步骤条 -->
+    <div
+      class="flex"
+      :class="direction === 'horizontal' ? 'flex-row' : 'flex-col'"
+    >
     <div
       v-for="(item, index) in items"
       :key="index"
@@ -117,6 +128,16 @@ const statusConfig = {
           getStepStatus(index) === 'finish' ? 'border-blue-500' : 'border-gray-200',
         ]"
       ></div>
+    </div>
+    </div>
+
+    <!-- 步骤内容区（可选）：通过具名插槽 #step-{index} 渲染当前步骤内容 -->
+    <div v-if="hasStepContent" class="mt-8">
+      <template v-for="(item, index) in items" :key="`content-${index}`">
+        <div v-show="index === current">
+          <slot :name="`step-${index}`" :current="current" :item="item" />
+        </div>
+      </template>
     </div>
   </div>
 </template>
