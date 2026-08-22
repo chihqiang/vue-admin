@@ -9,7 +9,7 @@ export interface LoginParams {
   username?: string
   /** 邮箱（与 username 二选一） */
   email?: string
-  /** md5 后的密码 */
+  /** 登录密码 */
   password: string
   /** 是否记住我 */
   remember_me?: boolean

@@ -23,7 +23,6 @@
     "mockjs": "^1.1.0",
     "pinia": "^4.0.2",
     "qrcode": "^1.5.4",
-    "spark-md5": "^3.0.2",
     "tailwindcss": "^4.3.3",
     "vue": "^3.5.41",
     "vue-echarts": "^8.1.0",
@@ -32,7 +31,6 @@
   "devDependencies": {
     "@types/mockjs": "^1.0.10",
     "@types/node": "^24.13.3",
-    "@types/spark-md5": "^3.0.5",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/eslint-config-typescript": "^14.9.0",
     "@vue/tsconfig": "^0.9.1",
