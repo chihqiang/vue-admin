@@ -52,7 +52,7 @@ export const menuRoutes: MenuRoute[] = [
       {
         path: '/dashboard/monitor',
         name: 'DashboardMonitor',
-        meta: { title: '监控页', hideInMenu: false },
+        meta: { title: '监控页' },
         requiresAuth: true,
       },
       {
@@ -81,6 +81,12 @@ export const menuRoutes: MenuRoute[] = [
         meta: { title: '分步表单' },
         requiresAuth: true,
       },
+      {
+        path: '/form/advanced-form',
+        name: 'AdvancedForm',
+        meta: { title: '高级表单' },
+        requiresAuth: true,
+      },
     ],
   },
   {
@@ -104,21 +110,21 @@ export const menuRoutes: MenuRoute[] = [
     ],
   },
   {
-    path: '/account',
-    name: 'Account',
+    path: '/profile',
+    name: 'Profile',
     meta: { title: '个人页', icon: 'User' },
     requiresAuth: true,
     children: [
       {
-        path: '/account/center',
-        name: 'AccountCenter',
+        path: '/profile/advanced',
+        name: 'ProfileAdvanced',
         meta: { title: '个人中心' },
         requiresAuth: true,
       },
       {
-        path: '/account/settings',
-        name: 'AccountSettings',
-        meta: { title: '账户设置' },
+        path: '/profile/basic',
+        name: 'ProfileBasic',
+        meta: { title: '基本设置' },
         requiresAuth: true,
       },
     ],

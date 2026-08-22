@@ -65,6 +65,24 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/profile/ProfileAdvanced.vue'),
         meta: { title: '个人中心' },
       },
+      {
+        path: '/dashboard/monitor',
+        name: 'DashboardMonitor',
+        component: () => import('@/views/dashboard/Monitor.vue'),
+        meta: { title: '监控页' },
+      },
+      {
+        path: '/list/basic',
+        name: 'BasicList',
+        component: () => import('@/views/list/BasicList.vue'),
+        meta: { title: '基础列表' },
+      },
+      {
+        path: '/list/search',
+        name: 'SearchList',
+        component: () => import('@/views/list/SearchList.vue'),
+        meta: { title: '搜索列表' },
+      },
     ],
   },
 ]
