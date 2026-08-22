@@ -19,8 +19,8 @@
 import { createVNode, render, reactive, h } from 'vue'
 import type { AppContext, Component } from 'vue'
 import Modal from './Modal.vue'
-import Button from './Button.vue'
-import { feedbackIconMap, feedbackIconColorMap } from './feedback/constants'
+import Button from '../form/Button.vue'
+import { feedbackIconMap, feedbackIconColorMap } from './constants'
 
 /** 确认框类型 */
 export type ConfirmType = 'confirm' | 'info' | 'success' | 'warning' | 'error'

@@ -27,7 +27,7 @@
  */
 import { watch, nextTick, ref, useSlots } from 'vue'
 import { X } from '@lucide/vue'
-import Button from './Button.vue'
+import Button from '../form/Button.vue'
 
 const props = withDefaults(
   defineProps<{
