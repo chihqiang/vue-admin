@@ -35,6 +35,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/dashboard/Workplace.vue'),
         meta: { title: '工作台' },
       },
+      {
+        path: '/form/basic-form',
+        name: 'BasicForm',
+        component: () => import('@/views/form/BasicForm.vue'),
+        meta: { title: '基础表单' },
+      },
     ],
   },
 ]
