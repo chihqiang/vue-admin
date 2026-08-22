@@ -6,17 +6,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import VChart from 'vue-echarts'
-import { use } from 'echarts/core'
-import { CanvasRenderer } from 'echarts/renderers'
-import { LineChart } from 'echarts/charts'
-import {
-  GridComponent,
-  TooltipComponent,
-  LegendComponent,
-} from 'echarts/components'
+import '@/components/charts/echarts'
 import type { EChartsOption } from 'echarts'
-
-use([CanvasRenderer, LineChart, GridComponent, TooltipComponent, LegendComponent])
 
 interface DataItem {
   x: string

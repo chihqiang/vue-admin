@@ -8,10 +8,7 @@ import { ref, onMounted, computed } from 'vue'
 import { Plus, ArrowRight } from '@lucide/vue'
 import { Avatar, Statistic, Divider, Card, Spin, Button } from '@/components/ui'
 import VChart from 'vue-echarts'
-import { use } from 'echarts/core'
-import { CanvasRenderer } from 'echarts/renderers'
-import { RadarChart } from 'echarts/charts'
-import { TooltipComponent, LegendComponent } from 'echarts/components'
+import '@/components/charts/echarts'
 import type { EChartsOption } from 'echarts'
 import { useUserStore } from '@/stores/user'
 import { timeFix } from '@/utils/util'
@@ -22,8 +19,6 @@ import type {
   TeamMember,
   RadarItem,
 } from '@/types/workplace'
-
-use([CanvasRenderer, RadarChart, TooltipComponent, LegendComponent])
 
 const userStore = useUserStore()
 

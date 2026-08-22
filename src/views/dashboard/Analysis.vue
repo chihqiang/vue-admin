@@ -6,7 +6,7 @@
  * 所有文案均为中文，使用 TailwindCSS + ECharts 重写
  */
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Info, MoreHorizontal, ArrowUp, ArrowDown } from '@lucide/vue'
 
 // 基础组件
@@ -23,22 +23,21 @@ import Bar from '@/components/charts/Bar.vue'
 
 // 饼图用 ECharts
 import VChart from 'vue-echarts'
-import { use } from 'echarts/core'
-import { CanvasRenderer } from 'echarts/renderers'
-import { PieChart } from 'echarts/charts'
-import { TooltipComponent, LegendComponent, TitleComponent } from 'echarts/components'
+import '@/components/charts/echarts'
 import type { EChartsOption } from 'echarts'
-
-use([CanvasRenderer, PieChart, TooltipComponent, LegendComponent, TitleComponent])
 
 // ========== 加载状态 ==========
 const loading = ref(true)
 
+// 模拟 1 秒后加载完成；页面卸载时清理定时器，避免回调在组件销毁后执行
+let loadingTimer: ReturnType<typeof setTimeout> | undefined
 onMounted(() => {
-  // 模拟 1 秒后加载完成
-  setTimeout(() => {
+  loadingTimer = setTimeout(() => {
     loading.value = false
   }, 1000)
+})
+onBeforeUnmount(() => {
+  if (loadingTimer) clearTimeout(loadingTimer)
 })
 
 // ========== 柱状图数据 ==========

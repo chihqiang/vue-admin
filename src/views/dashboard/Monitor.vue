@@ -5,14 +5,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import * as echarts from 'echarts/core'
-import { LineChart, BarChart, PieChart } from 'echarts/charts'
-import { GridComponent, TooltipComponent, LegendComponent, TitleComponent } from 'echarts/components'
-import { CanvasRenderer } from 'echarts/renderers'
+import '@/components/charts/echarts'
 import { Activity, TrendingUp, DollarSign, Users, Server, AlertTriangle, CheckCircle, ArrowUp, ArrowDown } from '@lucide/vue'
 import { Card, Statistic, Progress } from '@/components/ui'
 import type { Component } from 'vue'
-
-echarts.use([LineChart, BarChart, PieChart, GridComponent, TooltipComponent, LegendComponent, TitleComponent, CanvasRenderer])
 
 // ========== 顶部统计卡片 ==========
 // 用 Card 组合实现，每张卡含图标、标签、数值、趋势
