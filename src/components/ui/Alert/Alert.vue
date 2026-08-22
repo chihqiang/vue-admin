@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * 提示横幅 Alert
+ * 提示横幅 Alert（内联组件）
  *
  * 特性：
  * - type: success / info / warning / error

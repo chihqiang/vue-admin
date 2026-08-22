@@ -1,6 +1,6 @@
 /**
  * 基础组件统一导出
- * 使用方式：import { Button, Modal, Tabs, Input, Select, message, notification } from '@/components/ui'
+ * 使用方式：import { Button, Modal, Tabs, Input, Select, Alert, alert, message, notification } from '@/components/ui'
  */
 
 // 表单类
@@ -41,7 +41,7 @@ export { default as Modal } from './Modal.vue'
 export { default as Drawer } from './Drawer.vue'
 export { default as Popover } from './Popover.vue'
 export { default as Tooltip } from './Tooltip.vue'
-export { default as Alert } from './Alert.vue'
+export { Alert, alert } from './Alert'
 export { default as message } from './Message'
 export { default as notification } from './Notification'
 
