@@ -124,7 +124,7 @@ function handleOk() {
   <Teleport to="body">
     <div
       v-if="shouldRender"
-      class="fixed inset-0 z-50 flex"
+      class="fixed inset-0 z-[1000] flex"
       :class="centered ? 'items-center justify-center' : 'items-start justify-center pt-24'"
     >
       <!-- 遮罩层 -->

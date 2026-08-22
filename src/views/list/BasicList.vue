@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Plus, Edit, Trash2, Search } from '@lucide/vue'
-import { Button, Card, Input, Table, Tag, Pagination, Statistic, Progress, message } from '@/components/ui'
+import { Button, Card, Input, Table, Tag, Pagination, Statistic, Progress, message, confirm } from '@/components/ui'
 
 // ========== 统计信息 ==========
 const statsCards = [
@@ -81,9 +81,16 @@ function handleEdit(item: ListItem) {
 }
 
 function handleDelete(item: ListItem) {
-  if (confirm(`确认删除「${item.title}」？`)) {
-    allData.value = allData.value.filter((d) => d.id !== item.id)
-  }
+  confirm({
+    title: '确认删除',
+    content: `确认删除「${item.title}」？删除后不可恢复`,
+    okType: 'danger',
+    okText: '删除',
+    cancelText: '取消',
+    onOk: () => {
+      allData.value = allData.value.filter((d) => d.id !== item.id)
+    },
+  })
 }
 
 // ========== 状态映射 ==========

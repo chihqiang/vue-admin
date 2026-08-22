@@ -13,50 +13,182 @@
  *   Modal.error({ title: '错误', content: '网络异常' })
  *
  * onOk 支持 async：返回 Promise 期间确定按钮显示 loading。
+ *
+ * 实现说明：复用 Modal 组件，避免与 ConfirmContainer 重复。
  */
-import { createVNode, render } from 'vue'
-import type { AppContext } from 'vue'
-import ConfirmContainer from './ConfirmContainer.vue'
-import type { ConfirmConfig, ConfirmType } from './ConfirmContainer.vue'
+import { createVNode, render, reactive, h } from 'vue'
+import type { AppContext, Component } from 'vue'
+import { AlertCircle, CheckCircle2, Info, AlertTriangle } from '@lucide/vue'
+import Modal from './Modal.vue'
+import Button from './Button.vue'
 
-/** 全局容器 DOM */
-let container: HTMLDivElement | null = null
-/** 容器组件实例（暴露 add / removeByKey） */
-let containerEl: any = null
+/** 确认框类型 */
+export type ConfirmType = 'confirm' | 'info' | 'success' | 'warning' | 'error'
+
+/** 单个确认框配置 */
+export interface ConfirmConfig {
+  /** 标题 */
+  title?: string
+  /** 内容（字符串） */
+  content?: string
+  /** 类型 */
+  type?: ConfirmType
+  /** 确定按钮文字 */
+  okText?: string
+  /** 取消按钮文字 */
+  cancelText?: string
+  /** 确定按钮类型（primary / danger） */
+  okType?: 'primary' | 'danger'
+  /** 是否显示取消按钮（confirm 默认 true，info/success/warning/error 默认 false） */
+  cancelable?: boolean
+  /** 唯一 key */
+  key?: string | number
+  /** 确定回调 */
+  onOk?: () => void | Promise<void>
+  /** 取消回调 */
+  onCancel?: () => void
+  /** 完全关闭后回调 */
+  onClose?: () => void
+}
+
+/** 图标映射（confirm 不显示图标，与 antd 行为一致） */
+const iconMap: Partial<Record<Exclude<ConfirmType, 'confirm'>, Component>> = {
+  info: Info,
+  success: CheckCircle2,
+  warning: AlertTriangle,
+  error: AlertCircle,
+}
+
+/** 图标颜色映射 */
+const iconColorMap: Partial<Record<Exclude<ConfirmType, 'confirm'>, string>> = {
+  info: 'text-blue-500',
+  success: 'text-green-500',
+  warning: 'text-orange-500',
+  error: 'text-red-500',
+}
+
 let appContext: AppContext | null = null
 
-/** 自增 id */
-let seed = 0
-function genKey() {
-  return `confirm_${++seed}`
-}
-
-/** 创建容器（懒加载，首次调用时挂载到 body） */
-function ensureContainer() {
-  if (container) return
-
-  container = document.createElement('div')
-  container.className = 'confirm-container'
-  document.body.appendChild(container)
-
-  const vnode = createVNode(ConfirmContainer)
-  if (appContext) vnode.appContext = appContext
-  render(vnode, container)
-  // 使用 exposed 访问 defineExpose 暴露的方法
-  containerEl = vnode.component?.exposed
-}
-
-/** 内部统一入口 */
+/**
+ * 内部统一入口：基于 Modal 渲染
+ * 每次调用创建一个临时 div + 一个匿名组件，setup 返回的 render 函数读取响应式 state，
+ * 通过 #title / #footer slot 控制图标与按钮。
+ */
 function open(config: ConfirmConfig & { type: ConfirmType }) {
-  ensureContainer()
+  // 临时挂载容器
+  const div = document.createElement('div')
+  document.body.appendChild(div)
 
-  const key = config.key ?? genKey()
-  containerEl?.add({ ...config, _key: key })
+  // 响应式状态：open 触发 Modal 进入/离开动画，okLoading 控制按钮 loading
+  const state = reactive({
+    open: true,
+    okLoading: false,
+  })
 
-  /** 关闭 */
-  function close() {
-    containerEl?.removeByKey(key)
+  /** Modal 完全关闭后调用，销毁 vnode 与容器 div */
+  function destroy() {
+    render(null, div)
+    div.remove()
   }
+
+  /** 关闭：触发离开动画；Modal 200ms 后会 emit('close') → 调用 destroy */
+  function close() {
+    state.open = false
+  }
+
+  /** 点击确定：支持异步，期间 loading */
+  async function handleOk() {
+    if (state.okLoading) return
+    if (config.onOk) {
+      state.okLoading = true
+      try {
+        await config.onOk()
+      } finally {
+        state.okLoading = false
+      }
+    }
+    close()
+  }
+
+  /** 点击取消（X 按钮、遮罩、底部取消按钮统一走这里） */
+  function handleCancel() {
+    config.onCancel?.()
+    close()
+  }
+
+  /** Modal 完全关闭后销毁容器 */
+  function handleClose() {
+    config.onClose?.()
+    destroy()
+  }
+
+  const icon = iconMap[config.type as Exclude<ConfirmType, 'confirm'>]
+  const iconColor = iconColorMap[config.type as Exclude<ConfirmType, 'confirm'>] ?? ''
+  const isConfirm = config.type === 'confirm'
+  // 是否显示取消按钮：confirm 默认 true，其他默认 false；显式 cancelable 优先
+  const showCancel = config.cancelable ?? isConfirm
+  const finalOkText = config.okText ?? (isConfirm ? '确定' : '知道了')
+  const finalCancelText = config.cancelText ?? '取消'
+
+  // 匿名组件：setup 返回 render 函数，读取响应式 state 触发重渲染
+  const Inner = {
+    setup() {
+      return () =>
+        h(
+          Modal,
+          {
+            open: state.open,
+            centered: true,
+            // confirm 点击遮罩不关闭，info/success/warning/error 可关
+            maskClosable: !isConfirm,
+            closable: true,
+            destroyOnClose: true,
+            // 同步 v-model:open（X 按钮、遮罩触发 Modal 内部 close() 时回写）
+            'onUpdate:open': (val: boolean) => {
+              state.open = val
+            },
+            onOk: handleOk,
+            onCancel: handleCancel,
+            onClose: handleClose,
+          },
+          {
+            // 标题：图标 + 文字（confirm 无图标）
+            title: () =>
+              h('span', { class: 'flex items-center gap-2' }, [
+                icon ? h(icon, { size: 18, class: iconColor }) : null,
+                config.title ?? '',
+              ]),
+            // 内容
+            default: () => config.content,
+            // 底部按钮：confirm 有取消 + 确定，其他只有确定
+            footer: () =>
+              h('div', { class: 'flex justify-end gap-2' }, [
+                showCancel
+                  ? h(
+                      Button,
+                      { onClick: handleCancel },
+                      () => finalCancelText,
+                    )
+                  : null,
+                h(
+                  Button,
+                  {
+                    type: config.okType === 'danger' ? 'default' : 'primary',
+                    danger: config.okType === 'danger',
+                    loading: state.okLoading,
+                    onClick: handleOk,
+                  },
+                  () => finalOkText,
+                ),
+              ]),
+          },
+        )
+    },
+  }
+
+  const vnode = createVNode(Inner)
+  if (appContext) vnode.appContext = appContext
+  render(vnode, div)
 
   return { close }
 }
