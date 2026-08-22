@@ -14,7 +14,6 @@ import {
   ChevronDown,
 } from '@lucide/vue'
 import { useUserStore } from '@/stores/user'
-import { menuRoutes } from '@/config/menu'
 
 const route = useRoute()
 const router = useRouter()
@@ -37,34 +36,19 @@ function toggleCollapse() {
 }
 
 // ========== 面包屑 ==========
-/** 根据当前路由路径生成面包屑数据 */
+/**
+ * 直接基于 route.matched（vue-router 解析出的匹配链）生成
+ * 自动跳过 hideInBreadcrumb 和布局根（hideInMenu）的节点，
+ * 最后一级不可点，中间级可点回父路径
+ */
 const breadcrumbs = computed(() => {
-  const currentPath = route.path
-  const crumbs: { title: string; path?: string }[] = []
-
-  // 遍历菜单树找到当前路径对应的层级
-  for (const menu of menuRoutes) {
-    if (currentPath.startsWith(menu.path)) {
-      crumbs.push({ title: menu.meta.title })
-
-      if (menu.children) {
-        for (const child of menu.children) {
-          if (currentPath === child.path || currentPath.startsWith(child.path + '/')) {
-            crumbs.push({ title: child.meta.title, path: child.path })
-            break
-          }
-        }
-      }
-      break
-    }
-  }
-
-  // 如果没匹配到菜单配置，尝试用路由 meta.title
-  if (crumbs.length === 0 && route.meta.title) {
-    crumbs.push({ title: route.meta.title as string })
-  }
-
-  return crumbs
+  return route.matched
+    .filter((r) => !r.meta?.hideInBreadcrumb && !r.meta?.hideInMenu && r.meta?.title)
+    .map((r) => ({
+      title: r.meta.title as string,
+      // 当前页（链尾）不提供 path，模板里会渲染为不可点
+      path: r.path || undefined,
+    }))
 })
 
 // ========== 用户下拉菜单 ==========
@@ -88,13 +72,13 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
 /** 跳转到个人中心 */
 function goProfile() {
   userMenuOpen.value = false
-  router.push('/account/center')
+  router.push('/profile/advanced')
 }
 
 /** 跳转到账户设置 */
 function goSettings() {
   userMenuOpen.value = false
-  router.push('/account/settings')
+  router.push('/profile/basic')
 }
 
 /** 退出登录 */

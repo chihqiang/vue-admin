@@ -3,13 +3,15 @@
  * - 统一注入 Token 请求头
  * - 统一解包后端 { code, msg, data, request_id? } 结构
  * - code !== 200 按业务异常抛出
- * - 401 自动清理登录态并提示重新登录
+ * - 401 自动清理登录态并跳转登录页（携带 redirect 回跳）
  */
 import axios, { type AxiosError, type AxiosResponse } from 'axios'
 import type { InternalAxiosRequestConfig } from 'axios'
 import { ACCESS_TOKEN } from '@/constants'
+import { useUserStore } from '@/stores/user'
+import router from '@/router'
 import type { ApiResponse } from '@/types/api'
-import { alert } from '@/components/ui'
+import { alert, message } from '@/components/ui'
 
 // 创建 axios 实例
 const request = axios.create({
@@ -18,38 +20,74 @@ const request = axios.create({
   timeout: 10000,
 })
 
+/** 防止 401 后并发触发多次跳转 */
+let isRedirecting = false
+
+/** 401 统一处理：清登录态 → message 提示 → 跳登录页（带 redirect 回跳参数） */
+function handleUnauthorized(msg: string) {
+  const userStore = useUserStore()
+  console.error('[401 Unauthorized]', msg)
+  // 已有 token 才提示过期（避免未登录场景反复弹）
+  if (userStore.token) {
+    // clearState 统一清理 store state + localStorage（由 user store 内部负责持久化）
+    userStore.clearState()
+    // 用 message（短暂自动消失）而非 alert：alert 默认不自动关，
+    // 且通过 Teleport 渲染到 body，SPA 跳转后不会随之卸载，会残留在新页面
+    message.warning(msg)
+  }
+  // 已在跳转流程中则不再重复处理
+  if (isRedirecting) return
+  // 已在登录页（如登录请求本身返回 401）则只提示，不跳转，避免重复导航
+  if (router.currentRoute.value.path === '/login') return
+  isRedirecting = true
+  // 用 vue-router 跳转，保持 SPA 状态；query.redirect 供登录成功后回跳
+  const redirect = router.currentRoute.value.fullPath
+  router
+    .push({
+      path: '/login',
+      query: redirect && redirect !== '/' ? { redirect } : undefined,
+    })
+    .finally(() => {
+      isRedirecting = false
+    })
+}
+
 // 异常统一处理
 function errorHandler(error: AxiosError<ApiResponse>): Promise<never> {
   if (error.response) {
     const status = error.response.status
     const data = error.response.data
-    const token = localStorage.getItem(ACCESS_TOKEN)
 
     if (status === 403) {
-      const msg = (data && data.msg) || '无权访问该资源'
+      const msg = data?.msg || '无权访问该资源'
       console.error('[403 Forbidden]', msg)
       alert.error({ title: '无访问权限', description: msg })
+    } else if (status === 401) {
+      const msg = data?.msg || '登录状态已过期，请重新登录'
+      handleUnauthorized(msg)
+    } else {
+      // 其他 HTTP 错误统一提示
+      const msg = data?.msg || `请求失败（${status}）`
+      console.error(`[${status}]`, msg)
+      alert.error({ title: '请求失败', description: msg })
     }
-    if (status === 401) {
-      const msg = (data && data.msg) || '登录状态已过期，请重新登录'
-      console.error('[401 Unauthorized]', msg)
-      if (token) {
-        localStorage.removeItem(ACCESS_TOKEN)
-        setTimeout(() => {
-          window.location.reload()
-        }, 1200)
-      }
-      alert.warning({ title: '登录过期', description: msg })
-    }
+  } else if (error.request) {
+    // 网络层错误：未收到响应（断网 / 超时 / 跨域）
+    const msg = error.code === 'ECONNABORTED' ? '请求超时，请检查网络' : '网络异常，请稍后重试'
+    console.error('[Network Error]', msg)
+    alert.error({ title: '网络异常', description: msg })
+  } else {
+    console.error('[Request Error]', error.message)
   }
   return Promise.reject(error)
 }
 
-// 请求拦截：注入 token
+// 请求拦截：注入 token（从 userStore 取，不直接读 localStorage）
 request.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem(ACCESS_TOKEN)
+    const token = useUserStore().token
     if (token && config.headers) {
+      // ACCESS_TOKEN 为后端约定的请求头名（'Access-Token'）
       config.headers[ACCESS_TOKEN] = token
     }
     return config

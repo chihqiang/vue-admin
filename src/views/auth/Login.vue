@@ -5,7 +5,7 @@
  */
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { LogIn } from '@lucide/vue'
 import { useUserStore } from '@/stores/user'
 import { md5, timeFix } from '@/utils/util'
@@ -16,6 +16,7 @@ import MobileLoginForm from './components/MobileLoginForm.vue'
 import SocialLogin from './components/SocialLogin.vue'
 import LoginFooter from './components/LoginFooter.vue'
 
+const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
@@ -38,6 +39,19 @@ function onTabChange(key: 'tab1' | 'tab2') {
   isLoginError.value = false
   accountFormRef.value?.clearErrors()
   mobileFormRef.value?.clearErrors()
+}
+
+/**
+ * 登录成功后跳转目标
+ * - 优先回跳到被 401 拦截前所在的页面（来自 query.redirect）
+ * - 校验只允许同源相对路径（以 / 开头），避免开放重定向风险
+ * - 无 redirect 时跳首页
+ */
+function getRedirectTarget(): string {
+  const redirect = route.query.redirect
+  return typeof redirect === 'string' && redirect.startsWith('/')
+    ? redirect
+    : '/'
 }
 
 /** 登录提交 */
@@ -64,7 +78,7 @@ async function handleSubmit() {
       )
       await userStore.GetInfo()
       message.success(`${timeFix()}，欢迎回来，${userStore.name}！`)
-      await router.push('/')
+      await router.push(getRedirectTarget())
     } catch (e) {
       isLoginError.value = true
       errorMessage.value = (e instanceof Error && e.message) || '登录失败，请稍后再试'
@@ -84,7 +98,7 @@ async function handleSubmit() {
       })
       await userStore.GetInfo()
       message.success(`${timeFix()}，欢迎回来，${userStore.name}！`)
-      await router.push('/')
+      await router.push(getRedirectTarget())
     } catch (e) {
       isLoginError.value = true
       errorMessage.value = (e instanceof Error && e.message) || '登录失败，请稍后再试'
