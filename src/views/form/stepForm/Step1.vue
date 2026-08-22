@@ -4,7 +4,8 @@
  * 校验通过后 emit nextStep + 表单数据
  */
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive } from 'vue'
+import { Select, Input, Button } from '@/components/ui'
 
 const emit = defineEmits<{
   (e: 'nextStep', data: Record<string, unknown>): void
@@ -53,6 +54,11 @@ function nextStep() {
   if (!validate()) return
   emit('nextStep', { ...form })
 }
+
+/** 错误态边框样式 */
+function errClass(err?: string) {
+  return err ? 'border-red-300 ring-2 ring-red-100 focus:border-red-400 focus:ring-red-100' : ''
+}
 </script>
 
 <template>
@@ -61,36 +67,32 @@ function nextStep() {
     <div class="max-w-[500px] mx-auto py-10">
       <!-- 付款账户 -->
       <div class="flex items-start gap-4 mb-6">
-        <label class="w-24 text-sm text-gray-700 text-right pt-2 flex-shrink-0">付款账户</label>
+        <label class="w-24 text-sm text-gray-700 text-right pt-1.5 flex-shrink-0">付款账户</label>
         <div class="flex-1">
-          <select
+          <Select
             v-model="form.paymentUser"
-            class="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-            :class="errors.paymentUser ? 'border-red-300' : 'border-gray-200'"
-          >
-            <option value="">请选择付款账户</option>
-            <option v-for="opt in paymentOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-          </select>
+            :options="paymentOptions"
+            placeholder="请选择付款账户"
+            :custom-class="errClass(errors.paymentUser)"
+          />
           <p v-if="errors.paymentUser" class="text-xs text-red-500 mt-1">{{ errors.paymentUser }}</p>
         </div>
       </div>
 
       <!-- 收款账户 -->
       <div class="flex items-start gap-4 mb-6">
-        <label class="w-24 text-sm text-gray-700 text-right pt-2 flex-shrink-0">收款账户</label>
-        <div class="flex-1 flex">
-          <select
+        <label class="w-24 text-sm text-gray-700 text-right pt-1.5 flex-shrink-0">收款账户</label>
+        <div class="flex-1 flex gap-2">
+          <Select
             v-model="form.payType"
-            class="w-28 px-3 py-2 text-sm border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 border-gray-200 flex-shrink-0"
-          >
-            <option v-for="opt in payTypeOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-          </select>
-          <input
+            :options="payTypeOptions"
+            custom-class="w-28 flex-shrink-0"
+          />
+          <Input
             v-model="form.receiverAccount"
-            type="text"
             placeholder="请输入收款账户"
-            class="flex-1 px-3 py-2 text-sm border rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-            :class="errors.receiverAccount ? 'border-red-300' : 'border-gray-200'"
+            class="flex-1"
+            :custom-class="errClass(errors.receiverAccount)"
           />
         </div>
       </div>
@@ -100,14 +102,12 @@ function nextStep() {
 
       <!-- 收款人姓名 -->
       <div class="flex items-start gap-4 mb-6">
-        <label class="w-24 text-sm text-gray-700 text-right pt-2 flex-shrink-0">收款人姓名</label>
+        <label class="w-24 text-sm text-gray-700 text-right pt-1.5 flex-shrink-0">收款人姓名</label>
         <div class="flex-1">
-          <input
+          <Input
             v-model="form.receiverName"
-            type="text"
             placeholder="请输入收款人姓名"
-            class="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-            :class="errors.receiverName ? 'border-red-300' : 'border-gray-200'"
+            :custom-class="errClass(errors.receiverName)"
           />
           <p v-if="errors.receiverName" class="text-xs text-red-500 mt-1">{{ errors.receiverName }}</p>
         </div>
@@ -115,29 +115,23 @@ function nextStep() {
 
       <!-- 转账金额 -->
       <div class="flex items-start gap-4 mb-6">
-        <label class="w-24 text-sm text-gray-700 text-right pt-2 flex-shrink-0">转账金额</label>
-        <div class="flex-1 relative">
-          <span class="absolute left-3 top-2.5 text-sm text-gray-400">￥</span>
-          <input
+        <label class="w-24 text-sm text-gray-700 text-right pt-1.5 flex-shrink-0">转账金额</label>
+        <div class="flex-1">
+          <Input
             v-model="form.amount"
             type="number"
             placeholder="请输入金额"
-            class="w-full pl-7 pr-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-            :class="errors.amount ? 'border-red-300' : 'border-gray-200'"
-          />
+            :custom-class="errClass(errors.amount)"
+          >
+            <template #prefix><span class="text-gray-400">￥</span></template>
+          </Input>
           <p v-if="errors.amount" class="text-xs text-red-500 mt-1">{{ errors.amount }}</p>
         </div>
       </div>
 
       <!-- 按钮 -->
       <div class="ml-28">
-        <button
-          type="button"
-          @click="nextStep"
-          class="px-6 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600 transition-colors"
-        >
-          下一步
-        </button>
+        <Button type="primary" @click="nextStep">下一步</Button>
       </div>
     </div>
 

@@ -5,6 +5,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { CheckCircle } from '@lucide/vue'
+import { Button } from '@/components/ui'
 
 const props = defineProps<{
   /** 前面步骤收集的表单数据 */
@@ -64,20 +65,8 @@ function toOrderList() {
 
     <!-- 按钮 -->
     <div class="flex justify-center gap-3">
-      <button
-        type="button"
-        @click="finish"
-        class="px-6 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600 transition-colors"
-      >
-        再转一笔
-      </button>
-      <button
-        type="button"
-        @click="toOrderList"
-        class="px-6 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-      >
-        查看账单
-      </button>
+      <Button type="primary" @click="finish">再转一笔</Button>
+      <Button type="default" @click="toOrderList">查看账单</Button>
     </div>
   </div>
 </template>

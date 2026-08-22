@@ -1,11 +1,11 @@
 /**
  * 基础表单页面 /form/basic-form
  * 展示：标题、日期范围、目标描述、衡量标准、客户、邀请人、权重、公开性
- * 使用 TailwindCSS 重写，表单校验为手写轻量版（不依赖 UI 组件库）
  */
 <script setup lang="ts">
 import { reactive, ref, computed } from 'vue'
 import { Info } from '@lucide/vue'
+import { Card, Input, Radio, Checkbox, Button } from '@/components/ui'
 
 // ========== 表单数据 ==========
 const form = reactive({
@@ -93,22 +93,34 @@ const endDate = computed({
 
 /** 是否显示部分公开的可见范围选择 */
 const showVisibleTo = computed(() => form.visibility === 2)
+
+/** 切换可见范围选项 */
+function toggleVisibleTo(value: string) {
+  const idx = form.visibleTo.indexOf(value)
+  if (idx >= 0) form.visibleTo.splice(idx, 1)
+  else form.visibleTo.push(value)
+}
+
+/** 错误态边框样式 */
+function errClass(err?: string) {
+  return err ? 'border-red-300 ring-2 ring-red-100 focus:border-red-400 focus:ring-red-100' : ''
+}
 </script>
 
 <template>
-  <div class="min-h-full p-6 bg-gray-50">
+  <div class="min-h-full p-6 bg-gray-50 space-y-6">
     <!-- 页面说明 -->
-    <div class="bg-white rounded-lg border border-gray-100 p-4 mb-6">
+    <Card>
       <div class="flex items-start gap-2">
         <Info :size="16" class="text-blue-500 mt-0.5 flex-shrink-0" />
         <p class="text-sm text-gray-500">
           表单页用于向用户收集或验证信息，基础表单常见于数据项较少的表单场景。
         </p>
       </div>
-    </div>
+    </Card>
 
     <!-- 表单卡片 -->
-    <div class="bg-white rounded-lg border border-gray-100 px-8 py-6">
+    <Card>
       <form @submit.prevent="handleSubmit" class="max-w-2xl mx-auto space-y-6">
         <!-- 标题 -->
         <div class="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4">
@@ -116,13 +128,7 @@ const showVisibleTo = computed(() => form.visibility === 2)
             <span class="text-red-500">*</span> 标题
           </label>
           <div class="flex-1">
-            <input
-              v-model="form.name"
-              type="text"
-              placeholder="给目标起个名字"
-              class="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-colors"
-              :class="errors.name ? 'border-red-300' : 'border-gray-200'"
-            />
+            <Input v-model="form.name" placeholder="给目标起个名字" :custom-class="errClass(errors.name)" />
             <p v-if="errors.name" class="text-xs text-red-500 mt-1">{{ errors.name }}</p>
           </div>
         </div>
@@ -134,19 +140,9 @@ const showVisibleTo = computed(() => form.visibility === 2)
           </label>
           <div class="flex-1">
             <div class="flex items-center gap-2">
-              <input
-                v-model="startDate"
-                type="date"
-                class="flex-1 px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-                :class="errors.dateRange ? 'border-red-300' : 'border-gray-200'"
-              />
+              <Input v-model="startDate" type="date" :custom-class="errClass(errors.dateRange)" />
               <span class="text-gray-400">~</span>
-              <input
-                v-model="endDate"
-                type="date"
-                class="flex-1 px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-                :class="errors.dateRange ? 'border-red-300' : 'border-gray-200'"
-              />
+              <Input v-model="endDate" type="date" :custom-class="errClass(errors.dateRange)" />
             </div>
             <p v-if="errors.dateRange" class="text-xs text-red-500 mt-1">{{ errors.dateRange }}</p>
           </div>
@@ -192,13 +188,7 @@ const showVisibleTo = computed(() => form.visibility === 2)
             <span class="text-red-500">*</span> 客户
           </label>
           <div class="flex-1">
-            <input
-              v-model="form.customer"
-              type="text"
-              placeholder="请描述你服务的客户，方便客户快速筛查"
-              class="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-              :class="errors.customer ? 'border-red-300' : 'border-gray-200'"
-            />
+            <Input v-model="form.customer" placeholder="请描述你服务的客户，方便客户快速筛查" :custom-class="errClass(errors.customer)" />
             <p v-if="errors.customer" class="text-xs text-red-500 mt-1">{{ errors.customer }}</p>
           </div>
         </div>
@@ -209,12 +199,7 @@ const showVisibleTo = computed(() => form.visibility === 2)
             邀请人
           </label>
           <div class="flex-1">
-            <input
-              v-model="form.invites"
-              type="text"
-              placeholder="请输入邀请人"
-              class="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-            />
+            <Input v-model="form.invites" placeholder="请输入邀请人" />
           </div>
         </div>
 
@@ -224,13 +209,7 @@ const showVisibleTo = computed(() => form.visibility === 2)
             权重
           </label>
           <div class="flex-1 flex items-center gap-2">
-            <input
-              v-model.number="form.weight"
-              type="number"
-              min="0"
-              max="100"
-              class="w-24 px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-            />
+            <Input v-model="form.weight" type="number" custom-class="w-24" />
             <span class="text-sm text-gray-500">%</span>
           </div>
         </div>
@@ -243,64 +222,32 @@ const showVisibleTo = computed(() => form.visibility === 2)
           <div class="flex-1">
             <!-- 单选按钮组 -->
             <div class="flex items-center gap-4">
-              <label
-                v-for="opt in [
-                  { value: 1, label: '公开' },
-                  { value: 2, label: '部分公开' },
-                  { value: 3, label: '私密' },
-                ]"
-                :key="opt.value"
-                class="flex items-center gap-1.5 cursor-pointer"
-              >
-                <input
-                  v-model="form.visibility"
-                  type="radio"
-                  :value="opt.value"
-                  class="w-4 h-4 text-blue-500 focus:ring-blue-200"
-                />
-                <span class="text-sm text-gray-700">{{ opt.label }}</span>
-              </label>
+              <Radio v-model="form.visibility" :value="1">公开</Radio>
+              <Radio v-model="form.visibility" :value="2">部分公开</Radio>
+              <Radio v-model="form.visibility" :value="3">私密</Radio>
             </div>
             <p class="text-xs text-gray-400 mt-1">客户、邀评人默认被分享</p>
 
             <!-- 部分公开时的多选 -->
-            <div v-if="showVisibleTo" class="mt-3">
-              <select
-                v-model="form.visibleTo"
-                multiple
-                class="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 min-h-[72px]"
-              >
-                <option
-                  v-for="opt in visibilityOptions"
-                  :key="opt.value"
-                  :value="opt.value"
-                >
-                  {{ opt.label }}
-                </option>
-              </select>
-              <p class="text-xs text-gray-400 mt-1">按住 Ctrl 可多选</p>
+            <div v-if="showVisibleTo" class="mt-3 space-y-2">
+              <Checkbox
+                v-for="opt in visibilityOptions"
+                :key="opt.value"
+                :checked="form.visibleTo.includes(opt.value)"
+                @change="toggleVisibleTo(opt.value)"
+              >{{ opt.label }}</Checkbox>
             </div>
           </div>
         </div>
 
         <!-- 按钮区 -->
         <div class="flex justify-center gap-3 pt-4 border-t border-gray-50">
-          <button
-            type="submit"
-            :disabled="submitting"
-            class="px-6 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
+          <Button type="primary" html-type="submit" :loading="submitting">
             {{ submitting ? '提交中...' : '提交' }}
-          </button>
-          <button
-            type="button"
-            @click="handleSave"
-            class="px-6 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-          >
-            保存
-          </button>
+          </Button>
+          <Button type="default" @click="handleSave">保存</Button>
         </div>
       </form>
-    </div>
+    </Card>
   </div>
 </template>

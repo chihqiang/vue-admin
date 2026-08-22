@@ -5,6 +5,7 @@
  */
 <script setup lang="ts">
 import { reactive } from 'vue'
+import { Input, Select } from '@/components/ui'
 
 /** 表单数据 */
 const form = reactive({
@@ -27,6 +28,25 @@ const form = reactive({
 /** 校验错误 */
 const errors = reactive<Record<string, string>>({})
 
+/** 管理员选项 */
+const ownerOptions = [
+  { label: '王同学', value: '王同学' },
+  { label: '李同学', value: '李同学' },
+  { label: '黄同学', value: '黄同学' },
+]
+
+/** 审批人选项 */
+const approverOptions = [
+  { label: '王晓丽', value: '王晓丽' },
+  { label: '李军', value: '李军' },
+]
+
+/** 仓库类型选项 */
+const typeOptions = [
+  { label: '公开', value: '公开' },
+  { label: '私密', value: '私密' },
+]
+
 /** 校验 */
 function validate(): boolean {
   Object.keys(errors).forEach((k) => delete errors[k])
@@ -48,6 +68,11 @@ function getFormData() {
   return { ...form }
 }
 
+/** 错误态边框样式 */
+function errClass(err?: string) {
+  return err ? 'border-red-300 ring-2 ring-red-100 focus:border-red-400 focus:ring-red-100' : ''
+}
+
 // 暴露给父组件
 defineExpose({ validate, getFormData, errors })
 </script>
@@ -59,46 +84,24 @@ defineExpose({ validate, getFormData, errors })
       <!-- 仓库名 -->
       <div>
         <label class="block text-sm text-gray-700 mb-1">仓库名</label>
-        <input
-          v-model="form.name"
-          type="text"
-          placeholder="请输入仓库名称"
-          class="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-          :class="errors.name ? 'border-red-300' : 'border-gray-200'"
-        />
+        <Input v-model="form.name" placeholder="请输入仓库名称" :custom-class="errClass(errors.name)" />
         <p v-if="errors.name" class="text-xs text-red-500 mt-1">{{ errors.name }}</p>
       </div>
 
       <!-- 仓库域名 -->
       <div>
         <label class="block text-sm text-gray-700 mb-1">仓库域名</label>
-        <div class="flex">
-          <span class="inline-flex items-center px-3 text-sm text-gray-500 bg-gray-50 border border-r-0 border-gray-200 rounded-l-md">http://</span>
-          <input
-            v-model="form.url"
-            type="text"
-            placeholder="请输入"
-            class="flex-1 px-3 py-2 text-sm border-y border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-            :class="errors.url ? 'border-red-300' : ''"
-          />
-          <span class="inline-flex items-center px-3 text-sm text-gray-500 bg-gray-50 border border-l-0 border-gray-200 rounded-r-md">.com</span>
-        </div>
+        <Input v-model="form.url" placeholder="请输入" :custom-class="errClass(errors.url)">
+          <template #prefix><span class="text-xs text-gray-500">http://</span></template>
+          <template #suffix><span class="text-xs text-gray-500">.com</span></template>
+        </Input>
         <p v-if="errors.url" class="text-xs text-red-500 mt-1">{{ errors.url }}</p>
       </div>
 
       <!-- 仓库管理员 -->
       <div>
         <label class="block text-sm text-gray-700 mb-1">仓库管理员</label>
-        <select
-          v-model="form.owner"
-          class="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-          :class="errors.owner ? 'border-red-300' : 'border-gray-200'"
-        >
-          <option value="">请选择管理员</option>
-          <option value="王同学">王同学</option>
-          <option value="李同学">李同学</option>
-          <option value="黄同学">黄同学</option>
-        </select>
+        <Select v-model="form.owner" :options="ownerOptions" placeholder="请选择管理员" :custom-class="errClass(errors.owner)" />
         <p v-if="errors.owner" class="text-xs text-red-500 mt-1">{{ errors.owner }}</p>
       </div>
     </div>
@@ -108,15 +111,7 @@ defineExpose({ validate, getFormData, errors })
       <!-- 审批人 -->
       <div>
         <label class="block text-sm text-gray-700 mb-1">审批人</label>
-        <select
-          v-model="form.approver"
-          class="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-          :class="errors.approver ? 'border-red-300' : 'border-gray-200'"
-        >
-          <option value="">请选择审批人</option>
-          <option value="王晓丽">王晓丽</option>
-          <option value="李军">李军</option>
-        </select>
+        <Select v-model="form.approver" :options="approverOptions" placeholder="请选择审批人" :custom-class="errClass(errors.approver)" />
         <p v-if="errors.approver" class="text-xs text-red-500 mt-1">{{ errors.approver }}</p>
       </div>
 
@@ -124,19 +119,9 @@ defineExpose({ validate, getFormData, errors })
       <div>
         <label class="block text-sm text-gray-700 mb-1">生效日期</label>
         <div class="flex items-center gap-2">
-          <input
-            v-model="form.dateStart"
-            type="date"
-            class="flex-1 px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-            :class="errors.dateRange ? 'border-red-300' : 'border-gray-200'"
-          />
+          <Input v-model="form.dateStart" type="date" :custom-class="errClass(errors.dateRange)" />
           <span class="text-gray-400">~</span>
-          <input
-            v-model="form.dateEnd"
-            type="date"
-            class="flex-1 px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-            :class="errors.dateRange ? 'border-red-300' : 'border-gray-200'"
-          />
+          <Input v-model="form.dateEnd" type="date" :custom-class="errClass(errors.dateRange)" />
         </div>
         <p v-if="errors.dateRange" class="text-xs text-red-500 mt-1">{{ errors.dateRange }}</p>
       </div>
@@ -144,15 +129,7 @@ defineExpose({ validate, getFormData, errors })
       <!-- 仓库类型 -->
       <div>
         <label class="block text-sm text-gray-700 mb-1">仓库类型</label>
-        <select
-          v-model="form.type"
-          class="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-          :class="errors.type ? 'border-red-300' : 'border-gray-200'"
-        >
-          <option value="">请选择仓库类型</option>
-          <option value="公开">公开</option>
-          <option value="私密">私密</option>
-        </select>
+        <Select v-model="form.type" :options="typeOptions" placeholder="请选择仓库类型" :custom-class="errClass(errors.type)" />
         <p v-if="errors.type" class="text-xs text-red-500 mt-1">{{ errors.type }}</p>
       </div>
     </div>

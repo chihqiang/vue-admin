@@ -4,8 +4,9 @@
  * 右侧：Tab 切换（文章/应用/项目）展示不同列表内容
  */
 <script setup lang="ts">
-import { ref, reactive, onMounted, nextTick } from 'vue'
-import { Plus, X, Star, ThumbsUp, MessageCircle, Download, Pencil, Share2, Ellipsis } from '@lucide/vue'
+import { ref, onMounted, nextTick } from 'vue'
+import { Plus, Star, ThumbsUp, MessageCircle, Download, Pencil, Share2, Ellipsis } from '@lucide/vue'
+import { Card, Tag, Button } from '@/components/ui'
 import { useUserStore } from '@/stores/user'
 import request from '@/utils/request'
 
@@ -206,7 +207,7 @@ function loadMoreArticles() {
     <div class="grid grid-cols-1 lg:grid-cols-7 gap-6">
       <!-- ========== 左侧用户信息卡片 ========== -->
       <div class="lg:col-span-2">
-        <div class="bg-white rounded-lg border border-gray-100 p-6">
+        <Card>
           <!-- 头像 + 昵称 -->
           <div class="text-center mb-6">
             <div class="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden ring-2 ring-gray-100">
@@ -241,20 +242,13 @@ function loadMoreArticles() {
           <div class="mb-4">
             <h4 class="text-sm font-medium text-gray-800 mb-3">标签</h4>
             <div class="flex flex-wrap gap-2">
-              <span
+              <Tag
                 v-for="(tag, i) in tags"
                 :key="tag"
-                class="inline-flex items-center gap-1 px-2.5 py-1 text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded"
-              >
-                {{ tag.length > 20 ? tag.slice(0, 20) + '...' : tag }}
-                <button
-                  v-if="i !== 0"
-                  class="text-gray-400 hover:text-red-500 ml-0.5"
-                  @click="handleTagClose(tag)"
-                >
-                  <X :size="11" />
-                </button>
-              </span>
+                :closable="i !== 0"
+                size="sm"
+                @close="handleTagClose(tag)"
+              >{{ tag.length > 20 ? tag.slice(0, 20) + '...' : tag }}</Tag>
               <!-- 新增标签输入框 -->
               <input
                 v-if="tagInputVisible"
@@ -266,14 +260,15 @@ function loadMoreArticles() {
                 @keyup.enter="handleTagInputConfirm"
               />
               <!-- 新增标签按钮 -->
-              <button
+              <Button
                 v-else
-                class="inline-flex items-center gap-1 px-2.5 py-1 text-xs text-gray-400 bg-white border border-dashed border-gray-300 rounded hover:text-blue-500 hover:border-blue-400"
+                type="dashed"
+                size="sm"
                 @click="showTagInput"
               >
-                <Plus :size="11" />
+                <template #icon><Plus :size="11" /></template>
                 添加
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -301,12 +296,12 @@ function loadMoreArticles() {
               </div>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
 
       <!-- ========== 右侧 Tab 内容卡片 ========== -->
       <div class="lg:col-span-5">
-        <div class="bg-white rounded-lg border border-gray-100">
+        <Card :body-style="{ padding: '0' }">
           <!-- Tab 头部 -->
           <div class="flex items-center border-b border-gray-100 px-6">
             <button
@@ -343,13 +338,12 @@ function loadMoreArticles() {
                   </h4>
                   <!-- 标签 -->
                   <div class="flex gap-2 mb-2">
-                    <span
+                    <Tag
                       v-for="tag in item.tags"
                       :key="tag"
-                      class="px-2 py-0.5 text-xs text-blue-600 bg-blue-50 rounded"
-                    >
-                      {{ tag }}
-                    </span>
+                      color="blue"
+                      size="sm"
+                    >{{ tag }}</Tag>
                   </div>
                   <!-- 描述 -->
                   <p class="text-sm text-gray-500 leading-relaxed mb-3">{{ item.description }}</p>
@@ -375,13 +369,13 @@ function loadMoreArticles() {
                 </div>
                 <!-- 加载更多 -->
                 <div class="text-center pt-2">
-                  <button
-                    class="px-6 py-2 text-sm text-gray-600 border border-gray-200 rounded-md hover:text-blue-500 hover:border-blue-400 transition-colors"
-                    :disabled="articleLoadingMore"
+                  <Button
+                    type="default"
+                    :loading="articleLoadingMore"
                     @click="loadMoreArticles"
                   >
                     {{ articleLoadingMore ? '加载中...' : '加载更多' }}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -462,7 +456,7 @@ function loadMoreArticles() {
               </div>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   </div>

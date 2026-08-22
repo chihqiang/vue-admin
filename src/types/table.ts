@@ -1,5 +1,8 @@
-/** 表格列配置 */
-export interface TableColumn {
+/**
+ * 表格列配置
+ * @template T 行数据类型
+ */
+export interface TableColumn<T extends Record<string, any> = Record<string, any>> {
   /** 列标题 */
   title: string
   /** 对应数据的字段名 */
@@ -8,4 +11,10 @@ export interface TableColumn {
   width?: string
   /** 对齐方式 */
   align?: 'left' | 'center' | 'right'
+  /** 是否可排序 */
+  sortable?: boolean
+  /** 固定列位置 */
+  fixed?: 'left' | 'right'
+  /** 自定义渲染函数 */
+  render?: (row: T, index: number) => string
 }

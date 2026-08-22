@@ -6,9 +6,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { CircleAlert, LoaderCircle, LogIn } from '@lucide/vue'
+import { LogIn } from '@lucide/vue'
 import { useUserStore } from '@/stores/user'
 import { md5, timeFix } from '@/utils/util'
+import { Alert, Button } from '@/components/ui'
 import LoginHeader from './components/LoginHeader.vue'
 import AccountLoginForm from './components/AccountLoginForm.vue'
 import MobileLoginForm from './components/MobileLoginForm.vue'
@@ -156,12 +157,8 @@ async function handleSubmit() {
           </div>
 
           <!-- 登录失败错误提示条 -->
-          <div
-            v-if="isLoginError"
-            class="mb-5 flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600"
-          >
-            <CircleAlert :size="18" class="mt-0.5 shrink-0 text-red-500" />
-            <span>{{ errorMessage }}</span>
+          <div v-if="isLoginError" class="mb-5">
+            <Alert type="error" :description="errorMessage" />
           </div>
 
           <!-- Tab1：账号密码登录 -->
@@ -176,20 +173,18 @@ async function handleSubmit() {
 
           <!-- 登录按钮 -->
           <div class="mt-6">
-            <button
-              type="button"
+            <Button
+              type="primary"
+              size="lg"
+              block
+              :loading="loggingIn"
               :disabled="loggingIn"
-              class="flex h-10 w-full items-center justify-center rounded-md bg-blue-500 px-4 text-[16px] font-medium text-white shadow-sm transition-all hover:bg-blue-600 active:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
+              custom-class="!h-10 !text-[16px]"
               @click="handleSubmit"
             >
-              <LoaderCircle
-                v-if="loggingIn"
-                :size="18"
-                class="mr-2 animate-spin text-white"
-              />
-              <LogIn v-else :size="18" class="mr-2" />
-              <span>{{ loggingIn ? '登录中...' : '登 录' }}</span>
-            </button>
+              <template #icon><LogIn :size="18" /></template>
+              {{ loggingIn ? '登录中...' : '登 录' }}
+            </Button>
           </div>
 
           <!-- 第三方登录 + 注册 -->

@@ -6,6 +6,7 @@
 <script setup lang="ts">
 import { reactive, ref, computed, onBeforeUnmount } from 'vue'
 import { Smartphone, Mail } from '@lucide/vue'
+import { Input, Button } from '@/components/ui'
 import { getSmsCaptcha } from '@/api/login'
 
 // ========== 表单数据 ==========
@@ -106,31 +107,31 @@ onBeforeUnmount(() => {
 })
 
 defineExpose({ validate, getFormData, clearErrors })
+
+/** 错误态输入框样式 */
+function errorClass(err?: string) {
+  return err
+    ? 'border-red-400 ring-2 ring-red-100 hover:border-red-400 focus:border-red-400 focus:ring-red-100'
+    : ''
+}
 </script>
 
 <template>
   <div class="space-y-5">
     <!-- 手机号输入框 -->
     <div>
-      <div
-        class="flex h-10 items-center rounded-md border bg-white px-3 transition-all"
-        :class="
-          errors.mobile
-            ? 'border-red-400 ring-2 ring-red-100'
-            : 'border-gray-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100'
-        "
+      <Input
+        v-model="form.mobile"
+        type="tel"
+        size="lg"
+        :maxlength="11"
+        placeholder="请输入手机号"
+        :custom-class="errorClass(errors.mobile)"
+        @blur="validateMobile"
+        @change="errors.mobile && validateMobile()"
       >
-        <Smartphone :size="16" class="mr-2 shrink-0 text-gray-400" />
-        <input
-          v-model="form.mobile"
-          type="tel"
-          maxlength="11"
-          class="h-full w-full border-0 bg-transparent text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none"
-          placeholder="请输入手机号"
-          @blur="validateMobile"
-          @input="errors.mobile && validateMobile()"
-        />
-      </div>
+        <template #prefix><Smartphone :size="16" /></template>
+      </Input>
       <p v-if="errors.mobile" class="mt-1 text-xs text-red-500">
         {{ errors.mobile }}
       </p>
@@ -139,38 +140,32 @@ defineExpose({ validate, getFormData, clearErrors })
     <!-- 验证码 + 获取验证码按钮 -->
     <div class="grid grid-cols-10 gap-4">
       <div class="col-span-6">
-        <div
-          class="flex h-10 items-center rounded-md border bg-white px-3 transition-all"
-          :class="
-            errors.captcha
-              ? 'border-red-400 ring-2 ring-red-100'
-              : 'border-gray-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100'
-          "
+        <Input
+          v-model="form.captcha"
+          size="lg"
+          :maxlength="6"
+          placeholder="请输入验证码"
+          :custom-class="errorClass(errors.captcha)"
+          @blur="validateCaptcha"
+          @change="errors.captcha && validateCaptcha()"
         >
-          <Mail :size="16" class="mr-2 shrink-0 text-gray-400" />
-          <input
-            v-model="form.captcha"
-            type="text"
-            maxlength="6"
-            class="h-full w-full border-0 bg-transparent text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none"
-            placeholder="请输入验证码"
-            @blur="validateCaptcha"
-            @input="errors.captcha && validateCaptcha()"
-          />
-        </div>
+          <template #prefix><Mail :size="16" /></template>
+        </Input>
         <p v-if="errors.captcha" class="mt-1 text-xs text-red-500">
           {{ errors.captcha }}
         </p>
       </div>
       <div class="col-span-4">
-        <button
-          type="button"
+        <Button
+          type="default"
+          size="lg"
+          block
           :disabled="smsDisabled"
-          class="h-10 w-full rounded-md border border-blue-500 text-sm font-medium text-blue-600 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+          custom-class="border-blue-500 text-blue-600 hover:bg-blue-50 hover:border-blue-500 hover:text-blue-600"
           @click="handleGetCaptcha"
         >
           {{ captchaBtnText }}
-        </button>
+        </Button>
       </div>
     </div>
   </div>

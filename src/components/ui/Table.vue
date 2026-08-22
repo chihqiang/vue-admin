@@ -22,21 +22,14 @@
  */
 import { ref, computed, useSlots } from 'vue'
 import { ChevronUp, ChevronDown, ChevronsUpDown } from '@lucide/vue'
+import type { TableColumn } from '@/types/table'
 
-interface TableColumn {
-  title: string
-  dataIndex: string
-  width?: string
-  align?: 'left' | 'center' | 'right'
-  sortable?: boolean
-  fixed?: 'left' | 'right'
-  render?: (row: T, index: number) => string
-}
+export type { TableColumn }
 
 const props = withDefaults(
   defineProps<{
     data?: T[]
-    columns?: TableColumn[]
+    columns?: TableColumn<T>[]
     rowKey?: string
     loading?: boolean
     size?: 'sm' | 'md' | 'lg'
@@ -78,7 +71,7 @@ const sortedData = computed(() => {
   })
 })
 
-function toggleSort(col: TableColumn) {
+function toggleSort(col: TableColumn<T>) {
   if (!col.sortable) return
   if (sortField.value !== col.dataIndex) {
     sortField.value = col.dataIndex
@@ -99,7 +92,7 @@ const cellPadding = computed(() => ({ sm: 'px-2 py-1', md: 'px-3 py-2', lg: 'px-
 const alignClass = (align?: string) => ({ left: 'text-left', center: 'text-center', right: 'text-right' }[align || 'left'])
 
 /** 渲染单元格内容 */
-function renderCell(row: T, col: TableColumn, index: number) {
+function renderCell(row: T, col: TableColumn<T>, index: number) {
   if (col.render) return col.render(row, index)
   return row[col.dataIndex] ?? '-'
 }

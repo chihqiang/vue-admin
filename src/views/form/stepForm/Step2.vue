@@ -4,6 +4,7 @@
  */
 <script setup lang="ts">
 import { ref, onBeforeUnmount } from 'vue'
+import { Alert, Input, Button } from '@/components/ui'
 
 const props = defineProps<{
   /** 第一步收集的表单数据 */
@@ -47,9 +48,8 @@ onBeforeUnmount(() => {
 <template>
   <div class="max-w-[500px] mx-auto py-10">
     <!-- 警告提示 -->
-    <div class="flex items-center gap-2 mb-6 px-4 py-3 bg-orange-50 border border-orange-200 rounded-md">
-      <span class="text-orange-500 text-sm">⚠</span>
-      <span class="text-sm text-orange-600">确认转账后，资金将直接打入对方账户，无法退回。</span>
+    <div class="mb-6">
+      <Alert type="warning" description="确认转账后，资金将直接打入对方账户，无法退回。" />
     </div>
 
     <!-- 只读信息 -->
@@ -77,36 +77,24 @@ onBeforeUnmount(() => {
 
     <!-- 支付密码 -->
     <div class="flex items-start gap-4 mb-6">
-      <label class="w-24 text-sm text-gray-700 text-right pt-2 flex-shrink-0">支付密码</label>
+      <label class="w-24 text-sm text-gray-700 text-right pt-1.5 flex-shrink-0">支付密码</label>
       <div class="flex-1">
-        <input
+        <Input
           v-model="paymentPassword"
           type="password"
           placeholder="请输入支付密码"
-          class="w-4/5 px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-          :class="passwordError ? 'border-red-300' : 'border-gray-200'"
+          custom-class="w-4/5"
         />
         <p v-if="passwordError" class="text-xs text-red-500 mt-1">{{ passwordError }}</p>
       </div>
     </div>
 
     <!-- 按钮 -->
-    <div class="ml-28">
-      <button
-        type="button"
-        :disabled="loading"
-        @click="nextStep"
-        class="px-6 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mr-2"
-      >
+    <div class="ml-28 flex gap-2">
+      <Button type="primary" :loading="loading" @click="nextStep">
         {{ loading ? '提交中...' : '提交' }}
-      </button>
-      <button
-        type="button"
-        @click="prevStep"
-        class="px-6 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-      >
-        上一步
-      </button>
+      </Button>
+      <Button type="default" @click="prevStep">上一步</Button>
     </div>
   </div>
 </template>

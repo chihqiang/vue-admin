@@ -6,6 +6,8 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { Plus, AlertCircle } from '@lucide/vue'
+import { Card, Table, Input, Button } from '@/components/ui'
+import type { TableColumn } from '@/types/table'
 import RepositoryForm from './RepositoryForm.vue'
 import TaskForm from './TaskForm.vue'
 
@@ -30,6 +32,14 @@ const members = reactive<Member[]>([
   { key: '2', name: '李莉', workId: '002', department: 'IT部', editable: false },
   { key: '3', name: '王小帅', workId: '003', department: '财务部', editable: false },
 ])
+
+/** 成员表格列配置 */
+const memberColumns: TableColumn<Member>[] = [
+  { title: '成员姓名', dataIndex: 'name', width: '20%' },
+  { title: '工号', dataIndex: 'workId', width: '20%' },
+  { title: '所属部门', dataIndex: 'department', width: '40%' },
+  { title: '操作', dataIndex: 'action', width: '20%' },
+]
 
 /** 新增成员 */
 function newMember() {
@@ -160,119 +170,72 @@ const errorCount = computed(() => errorList.value.length)
 <template>
   <div class="min-h-full pb-24 bg-gray-50">
     <!-- 页面说明 -->
-    <div class="bg-white rounded-lg border border-gray-100 p-4 m-6 mb-4">
+    <Card custom-class="m-6 mb-4">
       <p class="text-sm text-gray-500">
         高级表单常见于一次性输入和提交大批量数据的场景。
       </p>
-    </div>
+    </Card>
 
     <!-- 仓库管理 -->
-    <div class="bg-white rounded-lg border border-gray-100 mx-6 mb-4">
-      <div class="px-6 py-4 border-b border-gray-100">
-        <h3 class="text-base font-medium text-gray-800">仓库管理</h3>
-      </div>
-      <div class="p-6" data-field="name">
+    <Card title="仓库管理" custom-class="mx-6 mb-4">
+      <div data-field="name">
         <RepositoryForm ref="repositoryRef" />
       </div>
-    </div>
+    </Card>
 
     <!-- 任务管理 -->
-    <div class="bg-white rounded-lg border border-gray-100 mx-6 mb-4">
-      <div class="px-6 py-4 border-b border-gray-100">
-        <h3 class="text-base font-medium text-gray-800">任务管理</h3>
-      </div>
-      <div class="p-6" data-field="name2">
+    <Card title="任务管理" custom-class="mx-6 mb-4">
+      <div data-field="name2">
         <TaskForm ref="taskRef" />
       </div>
-    </div>
+    </Card>
 
     <!-- 成员管理表格 -->
-    <div class="bg-white rounded-lg border border-gray-100 mx-6 mb-4">
-      <div class="px-6 py-4 border-b border-gray-100">
-        <h3 class="text-base font-medium text-gray-800">成员管理</h3>
-      </div>
-      <div class="p-6">
-        <!-- 表格 -->
-        <table class="w-full">
-          <thead>
-            <tr class="border-b border-gray-100">
-              <th class="text-left text-sm font-medium text-gray-500 py-3 px-2" style="width: 20%">成员姓名</th>
-              <th class="text-left text-sm font-medium text-gray-500 py-3 px-2" style="width: 20%">工号</th>
-              <th class="text-left text-sm font-medium text-gray-500 py-3 px-2" style="width: 40%">所属部门</th>
-              <th class="text-left text-sm font-medium text-gray-500 py-3 px-2" style="width: 20%">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="record in members"
-              :key="record.key"
-              class="border-b border-gray-50 hover:bg-gray-50"
-            >
-              <!-- 成员姓名 -->
-              <td class="py-3 px-2">
-                <input
-                  v-if="record.editable"
-                  v-model="record.name"
-                  type="text"
-                  placeholder="成员姓名"
-                  class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-                />
-                <span v-else class="text-sm text-gray-700">{{ record.name }}</span>
-              </td>
-              <!-- 工号 -->
-              <td class="py-3 px-2">
-                <input
-                  v-if="record.editable"
-                  v-model="record.workId"
-                  type="text"
-                  placeholder="工号"
-                  class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-                />
-                <span v-else class="text-sm text-gray-700">{{ record.workId }}</span>
-              </td>
-              <!-- 所属部门 -->
-              <td class="py-3 px-2">
-                <input
-                  v-if="record.editable"
-                  v-model="record.department"
-                  type="text"
-                  placeholder="所属部门"
-                  class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
-                />
-                <span v-else class="text-sm text-gray-700">{{ record.department }}</span>
-              </td>
-              <!-- 操作 -->
-              <td class="py-3 px-2">
-                <template v-if="record.editable">
-                  <template v-if="record.isNew">
-                    <button class="text-sm text-blue-500 hover:text-blue-600 mr-3" @click="saveRow(record)">添加</button>
-                    <button class="text-sm text-red-500 hover:text-red-600" @click="removeMember(record.key)">删除</button>
-                  </template>
-                  <template v-else>
-                    <button class="text-sm text-blue-500 hover:text-blue-600 mr-3" @click="saveRow(record)">保存</button>
-                    <button class="text-sm text-gray-500 hover:text-gray-600" @click="cancelEdit(record.key)">取消</button>
-                  </template>
-                </template>
-                <template v-else>
-                  <button class="text-sm text-blue-500 hover:text-blue-600 mr-3" @click="toggleEdit(record.key)">编辑</button>
-                  <button class="text-sm text-red-500 hover:text-red-600" @click="removeMember(record.key)">删除</button>
-                </template>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <Card title="成员管理" custom-class="mx-6 mb-4">
+      <Table :columns="memberColumns" :data="members" row-key="key">
+        <!-- 成员姓名 -->
+        <template #cell-name="{ row }">
+          <Input v-if="row.editable" v-model="row.name" placeholder="成员姓名" size="sm" />
+          <span v-else class="text-sm text-gray-700">{{ row.name }}</span>
+        </template>
 
-        <!-- 新增成员按钮 -->
-        <button
-          type="button"
-          class="w-full mt-4 py-2 border border-dashed border-gray-300 rounded-md text-sm text-gray-500 hover:text-blue-500 hover:border-blue-400 transition-colors flex items-center justify-center gap-1"
-          @click="newMember"
-        >
-          <Plus :size="14" />
-          新增成员
-        </button>
-      </div>
-    </div>
+        <!-- 工号 -->
+        <template #cell-workId="{ row }">
+          <Input v-if="row.editable" v-model="row.workId" placeholder="工号" size="sm" />
+          <span v-else class="text-sm text-gray-700">{{ row.workId }}</span>
+        </template>
+
+        <!-- 所属部门 -->
+        <template #cell-department="{ row }">
+          <Input v-if="row.editable" v-model="row.department" placeholder="所属部门" size="sm" />
+          <span v-else class="text-sm text-gray-700">{{ row.department }}</span>
+        </template>
+
+        <!-- 操作 -->
+        <template #cell-action="{ row }">
+          <template v-if="row.editable">
+            <template v-if="row.isNew">
+              <Button type="link" size="sm" custom-class="mr-2" @click="saveRow(row)">添加</Button>
+              <Button type="link" size="sm" danger @click="removeMember(row.key)">删除</Button>
+            </template>
+            <template v-else>
+              <Button type="link" size="sm" custom-class="mr-2" @click="saveRow(row)">保存</Button>
+              <Button type="link" size="sm" @click="cancelEdit(row.key)">取消</Button>
+            </template>
+          </template>
+          <template v-else>
+            <Button type="link" size="sm" custom-class="mr-2" @click="toggleEdit(row.key)">编辑</Button>
+            <Button type="link" size="sm" danger @click="removeMember(row.key)">删除</Button>
+          </template>
+        </template>
+      </Table>
+
+      <!-- 新增成员按钮 -->
+      <Button type="dashed" block custom-class="mt-4" @click="newMember">
+        <template #icon><Plus :size="14" /></template>
+        新增成员
+      </Button>
+    </Card>
 
     <!-- 底部固定工具栏 -->
     <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
@@ -313,14 +276,9 @@ const errorCount = computed(() => errorList.value.length)
         </div>
 
         <!-- 提交按钮 -->
-        <button
-          type="button"
-          :disabled="submitting"
-          class="px-6 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          @click="handleSubmit"
-        >
+        <Button type="primary" :loading="submitting" @click="handleSubmit">
           {{ submitting ? '提交中...' : '提交' }}
-        </button>
+        </Button>
       </div>
     </div>
   </div>

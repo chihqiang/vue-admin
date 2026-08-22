@@ -47,5 +47,6 @@ export { default as notification } from './Notification'
 
 // 数据类
 export { default as Table } from './Table.vue'
+export type { TableColumn } from '@/types/table'
 export { default as Tree } from './Tree.vue'
 export { default as Transfer } from './Transfer.vue'
