@@ -11,7 +11,7 @@
  */
 import Mock from 'mockjs'
 import { builder, failBuilder, getBody } from '../util'
-import type { LoginParams, LoginByMobileParams } from '@/api/login'
+import type { LoginParams, LoginByMobileParams, RegisterParams } from '@/api/login'
 
 // 账号 → 明文密码映射
 const VALID_CREDENTIALS: Record<string, string> = {
@@ -91,6 +91,59 @@ const twofactor = () =>
     stepCode: 0 as const,
   })
 
+/** 注册 */
+const register = (options: { body?: string }) => {
+  const body = getBody<RegisterParams>(options)
+  console.debug('[mock] /auth/register -> body =', body)
+
+  const { username, email, password, confirmPassword } = body
+
+  // 校验
+  if (!username?.trim()) {
+    return failBuilder('用户名不能为空')
+  }
+  if (!email?.trim()) {
+    return failBuilder('邮箱不能为空')
+  }
+  if (!/^([\w-])+@([\w-])+((\.[\w-]{2,3}){1,2})$/.test(email)) {
+    return failBuilder('邮箱格式不正确')
+  }
+  if (!password || password.length < 6) {
+    return failBuilder('密码至少 6 位')
+  }
+  if (password !== confirmPassword) {
+    return failBuilder('两次输入的密码不一致')
+  }
+
+  // 检查用户名是否已注册
+  if (VALID_CREDENTIALS[username]) {
+    return failBuilder('该用户名已被注册')
+  }
+
+  return builder(
+    {
+      id: Mock.mock('@guid'),
+      name: username,
+      username,
+      password: '',
+      avatar:
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=' +
+        encodeURIComponent(username),
+      status: 1,
+      telephone: '',
+      lastLoginIp: Mock.mock(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/),
+      lastLoginTime: Date.now(),
+      creatorId: 'system',
+      createTime: Date.now(),
+      deleted: 0,
+      roleId: 'admin',
+      lang: 'zh-CN',
+      token: `mock-token-${username}-${Date.now()}`,
+    },
+    '注册成功',
+  )
+}
+
 // 注册 mock
 // axios baseURL 是 '/api'，所以实际请求 URL 形如 '/api/auth/login'
 // 这里用包含匹配（不以 $ 结尾），兼容后续可能加的 query 与 baseURL
@@ -98,3 +151,4 @@ Mock.mock(/\/auth\/login/, 'post', login)
 Mock.mock(/\/auth\/logout/, 'post', logout)
 Mock.mock(/\/account\/sms/, 'post', smsCaptcha)
 Mock.mock(/\/auth\/2step-code/, 'post', twofactor)
+Mock.mock(/\/auth\/register/, 'post', register)

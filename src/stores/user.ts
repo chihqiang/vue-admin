@@ -81,6 +81,14 @@ export const useUserStore = defineStore('user', () => {
     storageRemove(TOKEN_EXPIRE_KEY)
   }
 
+  /**
+   * 外部直接设置 token（注册成功后使用）
+   * 默认使用 7 天过期
+   */
+  function setToken(newToken: string): void {
+    writeToken(newToken, 7 * 24 * 60 * 60 * 1000)
+  }
+
   // ============ Actions ============
 
   /**
@@ -164,6 +172,7 @@ export const useUserStore = defineStore('user', () => {
     Login,
     GetInfo,
     refreshUserInfo,
+    setToken,
     Logout,
     clearState,
   }

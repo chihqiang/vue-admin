@@ -3,6 +3,14 @@
  */
 <script setup lang="ts">
 import { ShieldCheck } from '@lucide/vue'
+
+withDefaults(
+  defineProps<{
+    /** 副标题，可被父组件覆盖 */
+    description?: string
+  }>(),
+  { description: '基于 Vue 3 + TypeScript + TailwindCSS 的企业级中后台脚手架' },
+)
 </script>
 
 <template>
@@ -22,7 +30,7 @@ import { ShieldCheck } from '@lucide/vue'
       </span>
     </a>
     <p class="mt-3 text-sm text-[rgba(0,0,0,0.45)]">
-      基于 Vue 3 + TypeScript + TailwindCSS 的企业级中后台脚手架
+      {{ description }}
     </p>
   </div>
 </template>

@@ -28,12 +28,11 @@ const platforms = [
       </a>
     </div>
     <!-- 注册入口 -->
-    <a
-      href="#"
+    <router-link
+      to="/register"
       class="text-blue-600 transition-colors hover:text-blue-700"
-      @click.prevent
     >
       注册账户
-    </a>
+    </router-link>
   </div>
 </template>

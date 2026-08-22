@@ -3,7 +3,7 @@
  * 包含：折叠按钮、面包屑、用户头像下拉菜单
  */
 <script setup lang="ts">
-import { computed, ref, onBeforeUnmount } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   Menu as MenuIcon,
@@ -14,6 +14,7 @@ import {
   ChevronDown,
 } from '@lucide/vue'
 import { useUserStore } from '@/stores/user'
+import { useClickOutside } from '@/hooks/useClickOutside'
 
 const route = useRoute()
 const router = useRouter()
@@ -60,14 +61,9 @@ function toggleUserMenu() {
 }
 
 /** 点击外部关闭下拉菜单 */
-function handleClickOutside(e: MouseEvent) {
-  if (userMenuRef.value && !userMenuRef.value.contains(e.target as Node)) {
-    userMenuOpen.value = false
-  }
-}
-
-document.addEventListener('click', handleClickOutside)
-onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
+useClickOutside(userMenuRef, () => {
+  userMenuOpen.value = false
+})
 
 /** 跳转到个人中心 */
 function goProfile() {

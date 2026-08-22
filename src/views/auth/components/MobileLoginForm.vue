@@ -1,13 +1,16 @@
 /**
  * 手机号验证码登录表单
  * 包含手机号输入、验证码输入、获取验证码倒计时
- * 通过 defineExpose 暴露 validate() 和 getFormData() 供父组件调用
+ * 通过 defineExpose 暴露 submitLogin() 和 clearErrors() 供父组件调用
  */
 <script setup lang="ts">
 import { reactive, ref, computed, onBeforeUnmount } from 'vue'
 import { Smartphone, Mail } from '@lucide/vue'
 import { Input, Button, message } from '@/components'
 import { getSmsCaptcha } from '@/api/login'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 // ========== 表单数据 ==========
 const form = reactive({
@@ -52,15 +55,24 @@ function validate() {
   return validateMobile() && validateCaptcha()
 }
 
-/** 获取表单数据 */
-function getFormData() {
-  return { ...form }
-}
-
 /** 清空错误 */
 function clearErrors() {
   errors.mobile = undefined
   errors.captcha = undefined
+}
+
+/**
+ * 提交登录
+ * 校验通过后调用 userStore.Login 并拉取用户信息
+ * 抛出异常时由父组件捕获并展示错误提示
+ */
+async function submitLogin(): Promise<void> {
+  if (!validate()) throw new Error('表单验证失败')
+  await userStore.Login({
+    mobile: form.mobile,
+    captcha: form.captcha,
+  })
+  await userStore.GetInfo()
 }
 
 // ========== 获取验证码倒计时 ==========
@@ -106,7 +118,7 @@ onBeforeUnmount(() => {
   if (smsTimer) window.clearInterval(smsTimer)
 })
 
-defineExpose({ validate, getFormData, clearErrors })
+defineExpose({ submitLogin, clearErrors })
 
 /** 错误态输入框样式 */
 function errorClass(err?: string) {

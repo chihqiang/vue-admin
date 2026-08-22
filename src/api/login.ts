@@ -83,6 +83,18 @@ export interface UserInfo extends Omit<LoginResult, 'token'> {
   role: UserRole
 }
 
+/** 注册接口参数 */
+export interface RegisterParams {
+  /** 用户名 */
+  username: string
+  /** 邮箱 */
+  email: string
+  /** 密码 */
+  password: string
+  /** 确认密码 */
+  confirmPassword: string
+}
+
 /**
  * 账号密码登录
  * @param params LoginParams
@@ -119,4 +131,12 @@ export function getInfo() {
  */
 export function logout() {
   return request.post<void>('/auth/logout', {})
+}
+
+/**
+ * 注册
+ * 注册成功后自动返回 token，前端可直接跳转到首页
+ */
+export function register(params: RegisterParams) {
+  return request.post<LoginResult>('/auth/register', params)
 }

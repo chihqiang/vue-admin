@@ -4,6 +4,7 @@ import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import tailwindcss from '@tailwindcss/vite'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -14,7 +15,15 @@ export default defineConfig(({ mode }) => {
   const useMock = String(env.VITE_USE_MOCK ?? 'true') === 'true'
 
   return {
-    plugins: [vue(), vueDevTools(), tailwindcss()],
+    plugins: [
+      vue(),
+      vueDevTools(),
+      tailwindcss(),
+      // 通过环境变量 VITE_ANALYZE=true 开启构建产物分析
+      process.env.VITE_ANALYZE
+        ? visualizer({ open: true, gzipSize: true, brotliSize: true })
+        : undefined,
+    ].filter(Boolean),
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -51,6 +60,9 @@ export default defineConfig(({ mode }) => {
     build: {
       target: 'es2022',
       sourcemap: false,
+      // ECharts 分包约 625KB，属于正常范围（中后台项目大量页面依赖图表），
+      // 调高阈值避免误报，实际不影响性能。
+      chunkSizeWarningLimit: 1000,
       rollupOptions: {
         output: {
           // 将大体积第三方依赖拆分到独立 chunk，避免单个 vendor 包过大、提升首屏按需加载效率

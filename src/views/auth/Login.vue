@@ -2,6 +2,9 @@
  * 登录页面
  * 风格：浅灰底 + 柔光光斑 + 居中白色登录卡片
  * 组装子组件：LoginHeader / AccountLoginForm / MobileLoginForm / SocialLogin / LoginFooter
+ *
+ * 每个登录方式的校验+API 调用逻辑由对应子组件（AccountLoginForm / MobileLoginForm）自行管理，
+ * 父组件只负责协调 Tab 切换、错误提示、登录成功后的跳转。
  */
 <script setup lang="ts">
 import { ref } from 'vue'
@@ -27,7 +30,7 @@ const activeTab = ref<'tab1' | 'tab2'>('tab1')
 // ========== 登录状态 ==========
 const loggingIn = ref(false)
 const isLoginError = ref(false)
-const errorMessage = ref('账户或密码错误')
+const errorMessage = ref('')
 
 // ========== 子组件引用 ==========
 const accountFormRef = ref<InstanceType<typeof AccountLoginForm>>()
@@ -54,57 +57,25 @@ function getRedirectTarget(): string {
     : '/'
 }
 
-/** 登录提交 */
+/** 登录提交：委托给当前激活的表单组件执行登录，父组件只处理结果 */
 async function handleSubmit() {
   isLoginError.value = false
+  loggingIn.value = true
 
-  if (activeTab.value === 'tab1') {
-    // 账号密码登录
-    if (!accountFormRef.value?.validate()) return
-    const data = accountFormRef.value.getFormData()
-
-    loggingIn.value = true
-    try {
-      // 判断账号是邮箱还是用户名
-      const emailRegex = /^([\w-])+@([\w-])+((\.[\w-]{2,3}){1,2})$/
-      const isEmail = emailRegex.test(data.username)
-      await userStore.Login(
-        {
-          [isEmail ? 'email' : 'username']: data.username,
-          password: data.password,
-          remember_me: data.rememberMe,
-        },
-        data.rememberMe,
-      )
-      await userStore.GetInfo()
-      message.success(`${timeFix()}，欢迎回来，${userStore.name}！`)
-      await router.push(getRedirectTarget())
-    } catch (e) {
-      isLoginError.value = true
-      errorMessage.value = (e instanceof Error && e.message) || '登录失败，请稍后再试'
-    } finally {
-      loggingIn.value = false
+  try {
+    if (activeTab.value === 'tab1') {
+      await accountFormRef.value?.submitLogin()
+    } else {
+      await mobileFormRef.value?.submitLogin()
     }
-  } else {
-    // 手机号登录
-    if (!mobileFormRef.value?.validate()) return
-    const data = mobileFormRef.value.getFormData()
-
-    loggingIn.value = true
-    try {
-      await userStore.Login({
-        mobile: data.mobile,
-        captcha: data.captcha,
-      })
-      await userStore.GetInfo()
-      message.success(`${timeFix()}，欢迎回来，${userStore.name}！`)
-      await router.push(getRedirectTarget())
-    } catch (e) {
-      isLoginError.value = true
-      errorMessage.value = (e instanceof Error && e.message) || '登录失败，请稍后再试'
-    } finally {
-      loggingIn.value = false
-    }
+    // 登录成功：欢迎语 + 跳转
+    message.success(`${timeFix()}，欢迎回来，${userStore.name}！`)
+    await router.push(getRedirectTarget())
+  } catch (e) {
+    isLoginError.value = true
+    errorMessage.value = (e instanceof Error && e.message) || '登录失败，请稍后再试'
+  } finally {
+    loggingIn.value = false
   }
 }
 </script>

@@ -49,6 +49,19 @@ async function bootstrap() {
   }
   setToastHandler(toastHandler)
 
+  // 全局 Vue 错误处理器：捕获组件渲染 / 生命周期中的未处理异常，
+  // 避免静默失败，同时给用户一个友好的提示。
+  app.config.errorHandler = (err, _instance, info) => {
+    console.error('[Vue errorHandler]', err, info)
+    message.error(err instanceof Error ? err.message : '页面渲染异常，请刷新重试')
+  }
+  // 开发环境下的警告也收集，生产环境忽略
+  if (import.meta.env.DEV) {
+    app.config.warnHandler = (msg, _instance, trace) => {
+      console.warn(`[Vue warnHandler] ${msg}`, trace)
+    }
+  }
+
   app.mount('#app')
 }
 

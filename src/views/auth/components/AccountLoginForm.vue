@@ -1,12 +1,15 @@
 /**
  * 账号密码登录表单
  * 包含用户名、密码输入、密码显隐切换、记住我、忘记密码
- * 通过 defineExpose 暴露 validate() 和 getFormData() 供父组件调用
+ * 通过 defineExpose 暴露 submitLogin() 和 clearErrors() 供父组件调用
  */
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { User, Lock, Eye, EyeOff } from '@lucide/vue'
 import { Input, Checkbox } from '@/components'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 // ========== 表单数据 ==========
 const form = reactive({
@@ -46,19 +49,35 @@ function validate() {
   return validateUsername() && validatePassword()
 }
 
-/** 获取表单数据 */
-function getFormData() {
-  return { ...form }
-}
-
 /** 清空错误 */
 function clearErrors() {
   errors.username = undefined
   errors.password = undefined
 }
 
+/**
+ * 提交登录
+ * 校验通过后调用 userStore.Login 并拉取用户信息
+ * 抛出异常时由父组件捕获并展示错误提示
+ */
+async function submitLogin(): Promise<void> {
+  if (!validate()) throw new Error('表单验证失败')
+  // 判断账号是邮箱还是用户名
+  const emailRegex = /^([\w-])+@([\w-])+((\.[\w-]{2,3}){1,2})$/
+  const isEmail = emailRegex.test(form.username)
+  await userStore.Login(
+    {
+      [isEmail ? 'email' : 'username']: form.username,
+      password: form.password,
+      remember_me: form.rememberMe,
+    },
+    form.rememberMe,
+  )
+  await userStore.GetInfo()
+}
+
 // 暴露给父组件
-defineExpose({ validate, getFormData, clearErrors })
+defineExpose({ submitLogin, clearErrors })
 
 /** 错误态输入框样式（覆盖默认边框） */
 function errorClass(err?: string) {

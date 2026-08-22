@@ -53,6 +53,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '登录', requiresAuth: false, hideInMenu: true },
   },
   {
+    path: '/register',
+    name: 'Register',
+    component: () => import('@/views/auth/Register.vue'),
+    meta: { title: '注册', requiresAuth: false, hideInMenu: true },
+  },
+  {
     // 所有需要 Layout 的页面都挂在这个路由的 children 下
     path: '/',
     component: () => import('@/layouts/BasicLayout.vue'),
@@ -157,6 +163,13 @@ const routes: RouteRecordRaw[] = [
         ],
       },
     ],
+  },
+  // ============ 404 兜底路由 ============
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('@/views/exception/NotFound.vue'),
+    meta: { title: '404', requiresAuth: false, hideInMenu: true, hideInBreadcrumb: true },
   },
 ]
 
