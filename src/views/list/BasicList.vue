@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Plus, Edit, Trash2, Search } from '@lucide/vue'
-import { Card, Input, Table, Tag, Pagination } from '@/components/ui'
+import { Card, Input, Table, Tag, Pagination, message } from '@/components/ui'
 
 // ========== 统计信息 ==========
 const statsCards = [
@@ -73,11 +73,11 @@ const columns = [
 
 // ========== 操作 ==========
 function handleAdd() {
-  window.alert('打开新增弹窗')
+  message.info('打开新增弹窗')
 }
 
 function handleEdit(item: ListItem) {
-  window.alert(`编辑：${item.title}`)
+  message.info(`编辑：${item.title}`)
 }
 
 function handleDelete(item: ListItem) {

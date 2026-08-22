@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { reactive, ref, computed, onBeforeUnmount } from 'vue'
 import { Smartphone, Mail } from '@lucide/vue'
-import { Input, Button } from '@/components/ui'
+import { Input, Button, message } from '@/components/ui'
 import { getSmsCaptcha } from '@/api/login'
 
 // ========== 表单数据 ==========
@@ -80,9 +80,9 @@ async function handleGetCaptcha() {
 
   try {
     const res = await getSmsCaptcha({ mobile: form.mobile })
-    window.alert(`验证码已发送（测试环境验证码为：${res.captcha}）`)
+    message.success(`验证码已发送（测试环境验证码为：${res.captcha}）`)
   } catch (e) {
-    window.alert(e instanceof Error ? e.message : '验证码发送失败，请稍后重试')
+    message.error(e instanceof Error ? e.message : '验证码发送失败，请稍后重试')
     return
   }
 

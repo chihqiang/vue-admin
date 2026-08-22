@@ -9,6 +9,7 @@ import axios, { type AxiosError, type AxiosResponse } from 'axios'
 import type { InternalAxiosRequestConfig } from 'axios'
 import { ACCESS_TOKEN } from '@/constants'
 import type { ApiResponse } from '@/types/api'
+import { alert } from '@/components/ui'
 
 // 创建 axios 实例
 const request = axios.create({
@@ -27,7 +28,7 @@ function errorHandler(error: AxiosError<ApiResponse>): Promise<never> {
     if (status === 403) {
       const msg = (data && data.msg) || '无权访问该资源'
       console.error('[403 Forbidden]', msg)
-      window.alert(msg)
+      alert.error({ title: '无访问权限', description: msg })
     }
     if (status === 401) {
       const msg = (data && data.msg) || '登录状态已过期，请重新登录'
@@ -38,7 +39,7 @@ function errorHandler(error: AxiosError<ApiResponse>): Promise<never> {
           window.location.reload()
         }, 1200)
       }
-      window.alert(msg)
+      alert.warning({ title: '登录过期', description: msg })
     }
   }
   return Promise.reject(error)

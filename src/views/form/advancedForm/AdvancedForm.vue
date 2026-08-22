@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { Plus, AlertCircle } from '@lucide/vue'
-import { Card, Table, Input, Button } from '@/components/ui'
+import { Card, Table, Input, Button, message } from '@/components/ui'
 import type { TableColumn } from '@/types/table'
 import RepositoryForm from './RepositoryForm.vue'
 import TaskForm from './TaskForm.vue'
@@ -64,7 +64,7 @@ function removeMember(key: string) {
 /** 保存行 */
 function saveRow(record: Member) {
   if (!record.name || !record.workId || !record.department) {
-    window.alert('请填写完整成员信息。')
+    message.warning('请填写完整成员信息。')
     return
   }
   record.editable = false
@@ -154,7 +154,7 @@ async function handleSubmit() {
   const taskData = taskRef.value?.getFormData()
   console.log('提交数据：', { repository: repoData, task: taskData, members: members.map(({ _originalData, ...rest }) => rest) })
   submitting.value = false
-  window.alert('提交成功')
+  message.success('提交成功')
 }
 
 /** 滚动到错误字段 */

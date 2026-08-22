@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { reactive, ref, computed } from 'vue'
 import { Info } from '@lucide/vue'
-import { Card, Input, Radio, Checkbox, Button } from '@/components/ui'
+import { Card, Input, Radio, Checkbox, Button, message } from '@/components/ui'
 
 // ========== 表单数据 ==========
 const form = reactive({
@@ -65,9 +65,9 @@ async function handleSubmit() {
     // 模拟接口提交
     await new Promise((r) => setTimeout(r, 800))
     console.log('表单提交数据：', { ...form })
-    window.alert('提交成功')
+    message.success('提交成功')
   } catch {
-    window.alert('提交失败，请重试')
+    message.error('提交失败，请重试')
   } finally {
     submitting.value = false
   }
@@ -76,7 +76,7 @@ async function handleSubmit() {
 /** 保存草稿 */
 function handleSave() {
   console.log('保存草稿：', { ...form })
-  window.alert('已保存为草稿')
+  message.success('已保存为草稿')
 }
 
 // ========== 日期处理 ==========

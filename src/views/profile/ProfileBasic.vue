@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { CloudUpload, Plus } from '@lucide/vue'
-import { Card, Input, Select, Button } from '@/components/ui'
+import { Card, Input, Select, Button, message } from '@/components/ui'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
@@ -58,7 +58,7 @@ async function handleUpdate() {
   await new Promise((r) => setTimeout(r, 800))
   console.log('更新信息：', { ...form })
   submitting.value = false
-  window.alert('更新成功')
+  message.success('更新成功')
 }
 
 // ========== 头像上传 ==========

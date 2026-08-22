@@ -9,7 +9,7 @@ import { useRouter } from 'vue-router'
 import { LogIn } from '@lucide/vue'
 import { useUserStore } from '@/stores/user'
 import { md5, timeFix } from '@/utils/util'
-import { Alert, Button } from '@/components/ui'
+import { Alert, Button, message } from '@/components/ui'
 import LoginHeader from './components/LoginHeader.vue'
 import AccountLoginForm from './components/AccountLoginForm.vue'
 import MobileLoginForm from './components/MobileLoginForm.vue'
@@ -63,7 +63,7 @@ async function handleSubmit() {
         data.rememberMe,
       )
       await userStore.GetInfo()
-      window.alert(`${timeFix()}，欢迎回来，${userStore.name}！`)
+      message.success(`${timeFix()}，欢迎回来，${userStore.name}！`)
       await router.push('/')
     } catch (e) {
       isLoginError.value = true
@@ -83,7 +83,7 @@ async function handleSubmit() {
         captcha: data.captcha,
       })
       await userStore.GetInfo()
-      window.alert(`${timeFix()}，欢迎回来，${userStore.name}！`)
+      message.success(`${timeFix()}，欢迎回来，${userStore.name}！`)
       await router.push('/')
     } catch (e) {
       isLoginError.value = true
